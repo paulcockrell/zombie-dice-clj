@@ -1,6 +1,7 @@
 (ns zombiedice.frontend.app
   (:require [zombiedice.frontend.kaplay :as kaplay]
-            [zombiedice.entities.dice :as dice]))
+            [zombiedice.entities.dice :as dice]
+            [zombiedice.entities.player :as player]))
 
 (def config
   {:width 1920
@@ -13,13 +14,18 @@
    :debugKey "d"
    :debug true})
 
+(defn init-round [[current-dice remaining-dice]]
+  (.log js/console (-> (player/init-player "Bob")
+                       (player/inc-round)
+                       (player/set-dice current-dice remaining-dice)
+                       (clj->js)))
+  (.log js/console (clj->js (dice/roll-dices current-dice))))
+
 (defn init
   "Initialize the game"
   []
   (kaplay/init config)
-  (let [[current-dice remaining-dice]
-        (-> (dice/init-dice)
-            (dice/take-dice 3))]
-    (.log js/console "current dice: " (clj->js current-dice) " remaining dice: " (clj->js remaining-dice))
-    (.log js/console (clj->js (dice/roll-dices current-dice))))
+  (let [dice (-> (dice/init-dice)
+                 (dice/take-dice 3))]
+    (init-round dice))
   (.log js/console "Zombie Dice initialized"))
