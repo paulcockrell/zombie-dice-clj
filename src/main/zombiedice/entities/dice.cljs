@@ -2,21 +2,29 @@
   (:require
    [cljs.core :as c]))
 
-;; 3 red, 4 yellow, 6 green
-(defrecord Dice [color num-shotguns num-feet num-brains])
-(defn make-dice ([color num-s num-f num-b]
-                 (->Dice color num-s num-f num-b)))
-(def red-dice (make-dice "red" 3 2 1))
-(def yellow-dice (make-dice "yellow" 2 2 2))
-(def green-dice (make-dice "green" 1 2 3))
+(def red-dice
+  {:color "red" :faces [:shotgun :shotgun :shotgun :feet :feet :brains]})
+
+(def yellow-dice
+  {:color "yellow" :faces [:shotgun :shotgun :feet :feet :brains :brains]})
+
+(def green-dice
+  {:color "green" :faces [:shotgun :feet :feet :brains :brains :brains]})
 
 (defn init-dice
   "There are 13 dice to start each play, 3 red, 4 yellow and 6 green"
   []
   (concat (repeat 3 red-dice) (repeat 4 yellow-dice) (repeat 6 green-dice)))
 
-(defn roll-dice [count dice-pot]
-  (.log js/console (clj->js dice-pot))
+(defn take-dice
+  "Take n dices from the current dice array"
+  [dice-pot count]
   (repeatedly count #(rand-nth dice-pot)))
 
-(comment (let [dice-pot (init-dice)] (repeatedly 3 #(rand-nth dice-pot))))
+(defn roll-dice
+  "Return the dice color and randomly chosen face"
+  [d]
+  {:color (:color d) :face (rand-nth (d :faces))})
+
+(defn roll-dices [dices]
+  (map roll-dice dices))

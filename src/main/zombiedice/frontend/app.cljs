@@ -15,6 +15,11 @@
 
 (defn init "Initialize the game" []
   (kaplay/init config)
-  (let [dice-pot (dice/init-dice)]
-    (.log js/console (clj->js (dice/roll-dice 3 dice-pot))))
+  (let [my-dice
+        (-> (dice/init-dice)
+            (dice/take-dice 3)
+            (dice/roll-dices)
+            ((fn [d] (.log js/console (clj->js d))))
+            (clj->js))]
+    (.log js/console my-dice))
   (.log js/console "Zombie Dice initialized"))
