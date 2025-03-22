@@ -7,5 +7,9 @@
  :dependencies
  []
 
+ :dev-http {8666 "public"}
+
  :builds
- {}}
+ {:frontend
+  {:target :browser
+   :modules {:main {:init-fn zombiedice.frontend.app/init}}}}}
