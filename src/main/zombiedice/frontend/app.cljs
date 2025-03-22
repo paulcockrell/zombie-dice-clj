@@ -13,13 +13,13 @@
    :debugKey "d"
    :debug true})
 
-(defn init "Initialize the game" []
+(defn init
+  "Initialize the game"
+  []
   (kaplay/init config)
-  (let [my-dice
+  (let [[current-dice remaining-dice]
         (-> (dice/init-dice)
-            (dice/take-dice 3)
-            (dice/roll-dices)
-            ((fn [d] (.log js/console (clj->js d))))
-            (clj->js))]
-    (.log js/console my-dice))
+            (dice/take-dice 3))]
+    (.log js/console "current dice: " (clj->js current-dice) " remaining dice: " (clj->js remaining-dice))
+    (.log js/console (clj->js (dice/roll-dices current-dice))))
   (.log js/console "Zombie Dice initialized"))

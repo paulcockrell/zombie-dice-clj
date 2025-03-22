@@ -12,14 +12,14 @@
   {:color "green" :faces [:shotgun :feet :feet :brains :brains :brains]})
 
 (defn init-dice
-  "There are 13 dice to start each play, 3 red, 4 yellow and 6 green"
+  "There are 13 dice to start each play, 3 red, 4 yellow and 6 green. Create shuffled vector"
   []
-  (concat (repeat 3 red-dice) (repeat 4 yellow-dice) (repeat 6 green-dice)))
+  (shuffle (concat (repeat 3 red-dice) (repeat 4 yellow-dice) (repeat 6 green-dice))))
 
 (defn take-dice
   "Take n dices from the current dice array"
   [dice-pot count]
-  (repeatedly count #(rand-nth dice-pot)))
+  (split-at count dice-pot))
 
 (defn roll-dice
   "Return the dice color and randomly chosen face"
