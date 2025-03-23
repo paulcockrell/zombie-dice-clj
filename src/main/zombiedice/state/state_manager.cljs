@@ -3,6 +3,7 @@
 
 (def default-game-state
   {:players []
+   :player-turn 0
    :round 0
    :current-dice []
    :remaining-dice []
@@ -10,6 +11,9 @@
 
 (defn get-players [game-state]
   (:players game-state))
+
+(defn get-current-player [game-state]
+  (get (get-players game-state) (:player-turn game-state 0)))
 
 (defn add-player [game-state player]
   (let [players (get-players game-state)]
@@ -25,4 +29,3 @@
 
 (defn update-state-playing [game-state]
   (update-state game-state :playing))
-
