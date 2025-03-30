@@ -28,8 +28,8 @@
 (defn roll
   [game-state]
   (let [[current-dice remaining-dice] (dice/take-dice (:remaining-dice @game-state) 3)]
-    (.log js/console (str "XXX hand: " current-dice))
-    (.log js/console (str "XXX pot: " remaining-dice))))
+    (add-dice! game-state current-dice remaining-dice)
+    (.log js/console (str "XXX current dice: " current-dice ", rolled  dice: " (dice/roll-dices current-dice)))))
 
 (defn state-ful-with-atom []
   [:div {:on-click (fn [] (roll game-state))}
