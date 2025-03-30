@@ -25,23 +25,54 @@
    (swap! game-state assoc :current-dice current-dice)
    (swap! game-state assoc :remaining-dice remaining-dice)))
 
+(defn reset-game!
+  "Reset the game state"
+  [game-state]
+  (add-player! game-state (player/init-player "Paul"))
+  (add-dice! game-state (dice/init-dice)))
+
 (defn roll
+  "Take 3 dice from the pot of dice and roll them. Returns list of current (rolled) dice and remaining dice.
+  Updates the game state"
   [game-state]
   (let [[current-dice remaining-dice] (dice/take-dice (:remaining-dice @game-state) 3)]
-    (add-dice! game-state current-dice remaining-dice)
-    (.log js/console (str "XXX current dice: " current-dice ", rolled  dice: " (dice/roll-dices current-dice)))))
+    (add-dice! game-state (dice/roll-dices current-dice) remaining-dice)))
 
-(defn state-ful-with-atom []
-  [:div {:on-click (fn [] (roll game-state))}
-   "Roll dice..."])
+(defn lister [items]
+  [:ul
+   (for [item items]
+     ^{:key (random-uuid)} [:li item])])
+
+(defn list-current-dice [game-state]
+  (let [dices (:current-dice @game-state)]
+    [:ul
+     (for [dice dices]
+       ^{:key (random-uuid)} [:li (str "Color: " (:color dice) ", face: " (:face dice))])]))
+
+(defn list-remaining-dice [game-state]
+  (let [dices (:remaining-dice @game-state)]
+    [:ul
+     (for [dice dices]
+       ^{:key (random-uuid)} [:li dice])]))
+
+(defn remaining-dice [dice]
+  [:p "Remaining dice: " (apply str (for [d dice] (str d ", ")))])
+
+(defn app []
+  [:div
+   [:button {:on-click (fn [] (roll game-state))}
+    "Roll dice..."]
+   [:button {:on-click (fn [] (reset-game! game-state))}
+    "Restart"]
+   [:div  "Current: " [list-current-dice game-state]]
+   [:div "Remaining: " [list-remaining-dice game-state]]])
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
-    (rc/render root (state-ful-with-atom))))
+    (rc/render root (app))))
 
 (defn init []
-  (add-player! game-state (player/init-player "Paul"))
-  (add-dice! game-state (dice/init-dice))
+  (reset-game! game-state)
 
   (mount-root)
 
