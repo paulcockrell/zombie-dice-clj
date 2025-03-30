@@ -1,7 +1,7 @@
 (ns zombiedice.entities.player)
 
 (defn init-player [name]
-  {:round 0 :brains 0 :name name})
+  {:brains 0 :name name})
 
 (defn inc-round [player]
   (assoc player :round (inc (player :round))))

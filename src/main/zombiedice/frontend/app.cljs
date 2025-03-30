@@ -1,39 +1,50 @@
 (ns zombiedice.frontend.app
-  (:require [zombiedice.frontend.kaplay :as kaplay]
-            [zombiedice.entities.dice :as dice]
+  (:require [zombiedice.entities.dice :as dice]
             [zombiedice.entities.player :as player]
-            [zombiedice.state.state-manager :as state-manager]
-            [zombiedice.scenes.round :as round]))
+            [reagent.core :as r]
+            [reagent.dom.client :as rc]))
 
-(def config
-  {:width 1920
-   :height 1080
-   :letterbox true
-   :background [0 0 0]
-   :global false
-   :touchToMouse true
-   :buttons {:roll {:keyboard ["space"] :mouse "left"}}
-   :debugKey "d"
-   :debug true})
+(defonce game-state
+  (r/atom
+   {:current-dice []
+    :remaining-dice []
+    :current-player 0
+    :players []
+    :round 0
+    :state :initializing}))
 
-(def k (kaplay/init config))
+(defn add-player!
+  "Add player to the game states players key"
+  [game-state player]
+  (swap! game-state update-in [:players] conj player))
 
-(defn create-player [name] ())
-  ;; (.log js/console (-> (player/init-player "Bob")
-  ;;                      (player/inc-round)
-  ;;                      (player/set-dice current-dice remaining-dice)
-  ;;                      (clj->js)))
-  ;; (.log js/console (clj->js (dice/roll-dices current-dice))))
+(defn add-dice!
+  ([game-state dice]
+   (add-dice! game-state [] dice))
+  ([game-state current-dice remaining-dice]
+   (swap! game-state assoc :current-dice current-dice)
+   (swap! game-state assoc :remaining-dice remaining-dice)))
+
+(defn roll
+  [game-state]
+  (let [[current-dice remaining-dice] (dice/take-dice (:remaining-dice @game-state) 3)]
+    (.log js/console (str "XXX hand: " current-dice))
+    (.log js/console (str "XXX pot: " remaining-dice))))
+
+(defn state-ful-with-atom []
+  [:div {:on-click (fn [] (roll game-state))}
+   "Roll dice..."])
+
+(defn mount-root []
+  (let [root (rc/create-root (.getElementById js/document "root"))]
+    (rc/render root (state-ful-with-atom))))
 
 (defn init []
-  ;; Load scenes
-  (kaplay/scene k :round round/make-round)
+  (add-player! game-state (player/init-player "Paul"))
+  (add-dice! game-state (dice/init-dice))
 
-  ;; Setup game state and start game
-  (let [game-state (-> state-manager/default-game-state
-                       (state-manager/add-dice (dice/init-dice))
-                       (state-manager/add-player (player/init-player "Paul")))]
+  (mount-root)
 
-    (kaplay/go k :round game-state))
-
+  (.log js/console (clj->js @game-state))
   (.log js/console "Zombie Dice initialized"))
+

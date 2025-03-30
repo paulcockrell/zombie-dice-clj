@@ -22,6 +22,9 @@
 (defn add [kaplay component_array]
   (.add kaplay (clj->js component_array)))
 
+(defn readd [kaplay component_array]
+  (.readd kaplay (clj->js component_array)))
+
 (defn on-button-press [kaplay button cb]
   (.onButtonPress kaplay button cb))
 
