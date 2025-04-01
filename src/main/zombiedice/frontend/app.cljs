@@ -54,30 +54,47 @@
      (for [dice dices]
        ^{:key (random-uuid)} [:li dice])]))
 
+(defn count-shots [game-state]
+  (count (filter (fn [x]
+                   (= :shotgun (:face x))) (:current-dice @game-state))))
+
 (defn count-brains [game-state]
   (count (filter (fn [x]
                    (= :brains (:face x))) (:current-dice @game-state))))
 
 (defn eat-brains! [game-state]
-  (let [current-player (:current-player @game-state)]
-    (swap! game-state update-in [:players (keyword current-player) :brains] (fn [current-brains]
-                                                                              (+ current-brains (count-brains game-state))))))
+  (swap! game-state update-in
+         [:players (keyword (:current-player @game-state))]
+         (fn [current-player]
+           (player/update-brains current-player (count-brains game-state)))))
+
+(defn get-shot! [game-state]
+  (swap! game-state update-in
+         [:players (keyword (:current-player @game-state))]
+         (fn [current-player]
+           (player/update-shots current-player (count-shots game-state)))))
 
 (defn show-current-brains [game-state]
   (let [current-player (:current-player @game-state)]
     (get-in @game-state [:players current-player :brains])))
 
+(defn show-current-shots [game-state]
+  (let [current-player (:current-player @game-state)]
+    (get-in @game-state [:players current-player :shots])))
+
 (defn app []
   [:div
    [:button {:on-click (fn []
                          (roll game-state)
-                         (eat-brains! game-state))}
+                         (eat-brains! game-state)
+                         (get-shot! game-state))}
     "Roll dice..."]
    [:button {:on-click (fn [] (reset-game! game-state))}
     "Restart"]
    [:div  "Current: " [list-current-dice game-state]]
    [:div "Remaining: " [list-remaining-dice game-state]]
-   [:div "Brains: " [show-current-brains game-state]]])
+   [:div "Brains: " [show-current-brains game-state]]
+   [:div "Shots: " [show-current-shots game-state]]])
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
