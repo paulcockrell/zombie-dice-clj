@@ -2,7 +2,8 @@
   (:require [zombiedice.entities.dice :as dice]
             [zombiedice.entities.player :as player]
             [reagent.core :as r]
-            [reagent.dom.client :as rc]))
+            [reagent.dom.client :as rc]
+            [cljs.core :as c]))
 
 (defonce game-state
   (r/atom
@@ -32,6 +33,7 @@
   "Reset the game state"
   [game-state]
   (add-player! game-state "Paul")
+  (add-player! game-state "Bob")
   (add-dice! game-state (dice/init-dice)))
 
 (defn roll
@@ -82,6 +84,18 @@
   (let [current-player (:current-player @game-state)]
     (get-in @game-state [:players current-player :shots])))
 
+(defn list-players [game-state]
+  (.log js/console (c/clj->js (keys (:players @game-state))))
+
+  (let [player-names (keys (:players @game-state))]
+    [:ul
+     (for [player-name player-names]
+       ^{:key (random-uuid)} [:li player-name])]))
+
+(defn show-current-player [game-state]
+  (.log js/console (clj->js (:current-player @game-state)))
+  (str (:current-player @game-state)))
+
 (defn app []
   [:div
    [:button {:on-click (fn []
@@ -91,8 +105,10 @@
     "Roll dice..."]
    [:button {:on-click (fn [] (reset-game! game-state))}
     "Restart"]
-   [:div  "Current: " [list-current-dice game-state]]
-   [:div "Remaining: " [list-remaining-dice game-state]]
+   [:div  "Hand " [list-current-dice game-state]]
+   [:div "Pot " [list-remaining-dice game-state]]
+   [:div "Players: " [list-players game-state]]
+   [:div "Player: " [show-current-player game-state]]
    [:div "Brains: " [show-current-brains game-state]]
    [:div "Shots: " [show-current-shots game-state]]])
 
