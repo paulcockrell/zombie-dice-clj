@@ -9,33 +9,22 @@
   (r/atom
    {:current-dice []
     :remaining-dice []
-    :current-player ""
-    :players {}
+    :players []
     :round 0
     :state :initializing}))
 
-(defn number-of-players [game-state]
-  (count (keys @game-state)))
+(defn get-current-player [game-state]
+  (first (:players @game-state)))
 
-(defn next-player-position [game-state]
-  (let [current-player (:current-player @game-state) players (:players @game-state)]
-    (prn players)
-    (prn (str ">>>" current-player (get-in players [current-player :postion])))
-    (if-let [current-pos (get-in players [current-player :position])]
-      (if (< current-pos (number-of-players game-state))
-        (inc current-pos)
-        0)
-      0)))
+(defn get-players [game-state]
+  (:players @game-state))
 
 (defn add-player!
   "Add player to the game states players key"
   [game-state name]
-  (prn (str "adding player " name))
-  (let [next-pos (next-player-position game-state)]
-    (prn (str "next pos " next-pos))
-    (swap! game-state (fn [{:keys [players]}]
-                        {:current-player (keyword name)
-                         :players (conj players {(keyword name) (conj (player/init-player) {:position next-pos})})}))))
+  (prn (str "Adding player " name))
+  (let [players (get-players game-state)]
+    (swap! game-state assoc :players (conj players (player/init-player name)))))
 
 (defn add-dice!
   ([game-state dice]
@@ -79,70 +68,59 @@
                    (= :brains (:face x))) (:current-dice @game-state))))
 
 (defn eat-brains! [game-state]
-  (swap! game-state update-in
-         [:players (keyword (:current-player @game-state))]
-         (fn [current-player]
-           (player/update-brains current-player (count-brains game-state)))))
+  (let [current-player (get-current-player game-state) players (get-players game-state)]
+    (swap! game-state assoc :players
+           (assoc players 0 (player/update-brains current-player (count-brains game-state))))))
 
 (defn reset-brains! [game-state]
-  (swap! game-state update-in
-         [:players (keyword (:current-player @game-state))]
-         (fn [current-player]
-           (player/update-brains current-player 0))))
+  (let [current-player (get-current-player game-state) players (get-players game-state)]
+    (swap! game-state assoc :players
+           (assoc players 0 (player/update-brains current-player 0)))))
 
 (defn get-shot! [game-state]
-  (swap! game-state update-in
-         [:players (keyword (:current-player @game-state))]
-         (fn [current-player]
-           (player/update-shots current-player (count-shots game-state)))))
+  (let [current-player (get-current-player game-state) players (get-players game-state)]
+    (swap! game-state assoc :players
+           (assoc players 0 (player/update-shots current-player (count-shots game-state))))))
 
 (defn reset-shots! [game-state]
-  (swap! game-state update-in
-         [:players (keyword (:current-player @game-state))]
-         (fn [current-player]
-           (player/update-shots current-player 0))))
+  (let [current-player (get-current-player game-state) players (get-players game-state)]
+    (swap! game-state assoc :players
+           (assoc players 0 (player/update-shots current-player 0)))))
 
 (defn get-current-brains [game-state]
-  (let [current-player (:current-player @game-state)]
-    (get-in @game-state [:players current-player :brains])))
+  (:brains (get-current-player game-state)))
 
 (defn get-current-shots [game-state]
-  (let [current-player (:current-player @game-state)]
-    (get-in @game-state [:players current-player :shots])))
+  (:shots (get-current-player game-state)))
 
 (defn list-players [game-state]
-  (let [player-names (keys (:players @game-state))]
+  (let [players (get-players game-state)]
     [:ul
-     (for [player-name player-names]
-       ^{:key (random-uuid)} [:li player-name])]))
+     (for [{:keys [name]} players]
+       ^{:key (random-uuid)} [:li name])]))
 
 (defn show-current-player [game-state]
-  (str (:current-player @game-state)))
+  (let [current-player (get-current-player game-state)]
+    (str (:name current-player))))
 
-(defn set-next-player-turn! [game-state]
-  ;; XXX This works!
-  ;; (def data {:a {:pos 1} :b {:pos 2} :c {:pos 3}})
-  ;; (select-keys data (for [[k v] data :when (= 3 (get v :pos))] k))
-  (let [players (:players @game-state) next-pos (next-player-position game-state)]
-    (prn (str "set next player to the one in position: " next-pos))
-    (prn players)
-    (prn (select-keys players (for [[k v] players :when (= next-pos (get v :position))] k)))))
-  ;; (let [current-player (:current-player @game-state) players (:players @game-state)]
-  ;;   (.log js/console (clj->js current-player) (clj->js players))
-  ;;   (let [next-player (or (get players (inc (.indexOf players current-player)))
-  ;;                         (get players 0))]
-  ;;     (swap! game-state update-in [:current-player]
-  ;;            (fn [_] (keyword next-player))))))
+(defn set-next-player-turn!
+  "Puts the current player (first in the players vector) to the end of the vector"
+  [game-state]
+  (let [players (get-players game-state)]
+    (reset-shots! game-state) ;; reset current player shot counts as they are yielding their turn
+    (add-dice! game-state (dice/init-dice)) ;; reset the dice
+    (swap! game-state assoc :players (vec (concat (rest players) [(first players)])))
+    (prn (clj->js @game-state))))
 
 (defn check-has-won? [game-state]
-  (let [current-player (:current-player @game-state)]
-    (if (<= 13 (get-in @game-state [:players current-player :brains]))
+  (let [current-player (get-current-player game-state)]
+    (if (<= 13 (:brains current-player))
       (.log js/console "You have won the game huzaa!")
       (.log js/console "You still need to eat 13 brains to win"))))
 
 (defn check-too-many-shots? [game-state]
-  (let [current-player (:current-player @game-state)]
-    (if (<= 3 (get-in @game-state [:players current-player :shots]))
+  (let [current-player (get-current-player game-state)]
+    (if (<= 3 (:shots current-player))
       (do
         (.log js/console "Oh no you've been shot too many times, you will loose all your brains")
         (reset-brains! game-state)
