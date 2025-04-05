@@ -14,16 +14,28 @@
     :round 0
     :state :initializing}))
 
-(defn get-next-available-position [game-state]
-  (let [players (:players @game-state)]
-    (inc (get-in (apply max-key #(val (first %)) (vals players)) [:position]))))
+(defn number-of-players [game-state]
+  (count (keys @game-state)))
+
+(defn next-player-position [game-state]
+  (let [current-player (:current-player @game-state) players (:players @game-state)]
+    (prn players)
+    (prn (str ">>>" current-player (get-in players [current-player :postion])))
+    (if-let [current-pos (get-in players [current-player :position])]
+      (if (< current-pos (number-of-players game-state))
+        (inc current-pos)
+        0)
+      0)))
 
 (defn add-player!
   "Add player to the game states players key"
   [game-state name]
-  (swap! game-state (fn [{:keys [players]}]
-                      {:current-player (keyword name)
-                       :players (conj players {(keyword name) (player/init-player)})})))
+  (prn (str "adding player " name))
+  (let [next-pos (next-player-position game-state)]
+    (prn (str "next pos " next-pos))
+    (swap! game-state (fn [{:keys [players]}]
+                        {:current-player (keyword name)
+                         :players (conj players {(keyword name) (conj (player/init-player) {:position next-pos})})}))))
 
 (defn add-dice!
   ([game-state dice]
@@ -108,12 +120,19 @@
   (str (:current-player @game-state)))
 
 (defn set-next-player-turn! [game-state]
-  (let [current-player (:current-player @game-state) players (:players @game-state)]
-    (.log js/console (clj->js current-player) (clj->js players))
-    (let [next-player (or (get players (inc (.indexOf players current-player)))
-                          (get players 0))]
-      (swap! game-state update-in [:current-player]
-             (fn [_] (keyword next-player))))))
+  ;; XXX This works!
+  ;; (def data {:a {:pos 1} :b {:pos 2} :c {:pos 3}})
+  ;; (select-keys data (for [[k v] data :when (= 3 (get v :pos))] k))
+  (let [players (:players @game-state) next-pos (next-player-position game-state)]
+    (prn (str "set next player to the one in position: " next-pos))
+    (prn players)
+    (prn (select-keys players (for [[k v] players :when (= next-pos (get v :position))] k)))))
+  ;; (let [current-player (:current-player @game-state) players (:players @game-state)]
+  ;;   (.log js/console (clj->js current-player) (clj->js players))
+  ;;   (let [next-player (or (get players (inc (.indexOf players current-player)))
+  ;;                         (get players 0))]
+  ;;     (swap! game-state update-in [:current-player]
+  ;;            (fn [_] (keyword next-player))))))
 
 (defn check-has-won? [game-state]
   (let [current-player (:current-player @game-state)]
