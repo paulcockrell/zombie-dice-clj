@@ -96,8 +96,8 @@
 (defn list-players [game-state]
   (let [players (get-players game-state)]
     [:ul
-     (for [{:keys [name]} players]
-       ^{:key (random-uuid)} [:li name])]))
+     (for [{:keys [name brains]} players]
+       ^{:key (random-uuid)} [:li (str name " has eaten " brains " brains.")])]))
 
 (defn show-current-player [game-state]
   (let [current-player (get-current-player game-state)]
