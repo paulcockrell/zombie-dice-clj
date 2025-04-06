@@ -1,7 +1,6 @@
 (ns zombiedice.state.state-manager)
 
 ;; Initial state
-;; Player 1 takes 3 dice
 ;; Player 1 rolls 3 dice
 ;; Player 1 collects any brain dice
 ;; > If Player has 13 brains they win the game

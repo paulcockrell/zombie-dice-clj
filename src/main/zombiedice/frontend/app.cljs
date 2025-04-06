@@ -53,10 +53,6 @@
                                       3)
         [current-dice remaining-dice] (dice/take-dice (:remaining-dice game-state) number-of-new-dices-to-take)
         new-dice (into current-dice (dice/get-colors last-round-feet-dice))]
-    (prn "Last round feet dice " last-round-feet-dice)
-    (prn "Current dice " current-dice)
-    (prn "Remaining dice " remaining-dice)
-    (prn "New dice " new-dice)
     (add-dice game-state (dice/roll-dices new-dice) remaining-dice)))
 
 ;; Brain functions
@@ -81,7 +77,6 @@
   (let [current-player (get-current-player game-state)
         players (get-players game-state)
         brains (get-round-brains game-state)]
-    (prn (str "XXX " current-player " XXX " brains))
     (assoc game-state :players
            (assoc players 0 (player/add-brains current-player brains)))))
 
@@ -151,6 +146,7 @@
     (save-game-state! game-state new-game-state)))
 
 (defn loose-round [game-state]
+  (prn "Oh no you got shot too many times, you loose all your brains from this round!")
   (-> game-state
       (move-current-player-to-last)
       (reset-shots)
