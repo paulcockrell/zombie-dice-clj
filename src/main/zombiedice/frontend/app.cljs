@@ -51,14 +51,14 @@
 
 ;; Brain functions
 
-(defn get-brains [game-state]
+(defn get-round-brains [game-state]
   (:brains game-state))
 
 (defn get-current-player-brains [game-state]
   (:brains (get-current-player game-state)))
 
 (defn update-round-brains [game-state]
-  (let [current-brains (get-brains game-state)
+  (let [current-brains (get-round-brains game-state)
         new-brains (dice/count-brains (get-current-dice game-state))]
     (assoc game-state :brains (+ current-brains new-brains))))
 
@@ -70,7 +70,7 @@
   [game-state]
   (let [current-player (get-current-player game-state)
         players (get-players game-state)
-        brains (get-brains game-state)]
+        brains (get-round-brains game-state)]
     (prn (str "XXX " current-player " XXX " brains))
     (assoc game-state :players
            (assoc players 0 (player/add-brains current-player brains)))))
@@ -90,9 +90,6 @@
 
 ;; Player functions
 
-(defn get-current-player-shots [game-state]
-  (:shots (get-current-player game-state)))
-
 (defn list-players [game-state]
   (let [players (get-players @game-state)]
     [:div "Players:"
@@ -107,20 +104,11 @@
 
 (defn show-round-brains [game-state]
   [:div "Current brains eaten: "
-   (get-brains @game-state)])
+   (get-round-brains @game-state)])
 
 (defn show-round-shots [game-state]
   [:div "Current shots taken: "
    (get-shots @game-state)])
-
-(defn win-round [game-state]
-  (prn (str "Player " (:name (get-current-player game-state)) " has won the game!"))
-  game-state)
-
-(defn loose-round [game-state]
-  (-> game-state
-      (reset-shots)
-      (reset-brains)))
 
 (defn process-hand [game-state]
   (-> game-state
@@ -128,22 +116,9 @@
       (update-round-shots)
       (update-round-brains)))
 
-(defn check-hand [game-state]
-  (cond
-    (<= 3 (get-shots game-state)) (loose-round game-state)
-    (<= 13 (get-current-player-brains game-state)) (win-round game-state)
-    :else game-state))
-
 (defn move-current-player-to-last [game-state]
   (let [players (get-players game-state)]
     (assoc game-state :players (vec (concat (rest players) [(first players)])))))
-
-(defn play-hand! [game-state]
-  (let [new-game-state
-        (-> @game-state
-            (process-hand)
-            (check-hand))]
-    (save-game-state! game-state new-game-state)))
 
 (defn yield-turn! [game-state]
   (let [new-game-state
@@ -163,6 +138,32 @@
             (add-player "Paul")
             (add-player "Bob")
             (add-dice (dice/init-dice)))]
+    (save-game-state! game-state new-game-state)))
+
+(defn loose-round [game-state]
+  (-> game-state
+      (move-current-player-to-last)
+      (reset-shots)
+      (reset-brains)
+      (add-dice (dice/init-dice))))
+
+(defn win-round [game-state]
+  (prn (str "Player " (:name (get-current-player game-state)) " has won the game!"))
+  game-state)
+
+(defn check-hand [game-state]
+  (let [player-total-brains (+ (get-current-player-brains game-state) (get-round-brains game-state))
+        shots (get-shots game-state)]
+    (cond
+      (<= 3 shots) (loose-round game-state)
+      (<= 13 player-total-brains) (win-round game-state)
+      :else game-state)))
+
+(defn play-hand! [game-state]
+  (let [new-game-state
+        (-> @game-state
+            (process-hand)
+            (check-hand))]
     (save-game-state! game-state new-game-state)))
 
 (defn list-current-dice [game-state]
