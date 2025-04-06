@@ -35,8 +35,23 @@
 (defn roll-dices [dices]
   (map roll-dice dices))
 
+(defn filter-shots [dices]
+  (filter (fn [x] (= :shotgun (:face x))) dices))
+
 (defn count-shots [dices]
-  (count (filter (fn [x] (= :shotgun (:face x))) dices)))
+  (count (filter-shots dices)))
+
+(defn filter-brains [dices]
+  (filter (fn [x] (= :brains (:face x))) dices))
 
 (defn count-brains [dices]
-  (count (filter (fn [x] (= :brains (:face x))) dices)))
+  (count (filter-brains dices)))
+
+(defn filter-feet [dices]
+  (filter (fn [x] (= :feet (:face x))) dices))
+
+(defn count-feet [dices]
+  (count (filter-feet dices)))
+
+(defn get-colors [dices]
+  (map (fn [d] (:color d)) dices))

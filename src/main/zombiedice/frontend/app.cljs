@@ -43,11 +43,21 @@
 
 (defn roll-dice
   "Take 3 dice from the pot of dice and roll them. Returns list of current
-  (rolled) dice and remaining dice."
+  (rolled) dice and remaining dice. If your current dice have 'feet' these will
+  be kept for the next roll and the others replaced from the pot"
   [game-state]
-  (prn "Rolling dice")
-  (let [[current-dice remaining-dice] (dice/take-dice (:remaining-dice game-state) 3)]
-    (add-dice game-state (dice/roll-dices current-dice) remaining-dice)))
+
+  (let [last-round-feet-dice (dice/filter-feet (:current-dice game-state))
+        number-of-new-dices-to-take (if (< 0 (count last-round-feet-dice))
+                                      (- 3 (count last-round-feet-dice))
+                                      3)
+        [current-dice remaining-dice] (dice/take-dice (:remaining-dice game-state) number-of-new-dices-to-take)
+        new-dice (into current-dice (dice/get-colors last-round-feet-dice))]
+    (prn "Last round feet dice " last-round-feet-dice)
+    (prn "Current dice " current-dice)
+    (prn "Remaining dice " remaining-dice)
+    (prn "New dice " new-dice)
+    (add-dice game-state (dice/roll-dices new-dice) remaining-dice)))
 
 ;; Brain functions
 
