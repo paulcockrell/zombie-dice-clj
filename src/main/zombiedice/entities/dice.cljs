@@ -34,3 +34,9 @@
 
 (defn roll-dices [dices]
   (map roll-dice dices))
+
+(defn count-shots [dices]
+  (count (filter (fn [x] (= :shotgun (:face x))) dices)))
+
+(defn count-brains [dices]
+  (count (filter (fn [x] (= :brains (:face x))) dices)))
