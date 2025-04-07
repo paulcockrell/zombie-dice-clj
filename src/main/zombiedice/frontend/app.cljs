@@ -206,12 +206,12 @@
    [roll-dice-btn game-state]
    [yield-turn-btn game-state]
    [reset-game-btn game-state]
-   [show-current-hand game-state]
-   [list-remaining-dice game-state]
-   [list-players game-state]
    [show-current-player game-state]
    [show-round-brains game-state]
-   [show-round-shots game-state]])
+   [show-round-shots game-state]
+   [show-current-hand game-state]
+   [list-remaining-dice game-state]
+   [list-players game-state]])
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
