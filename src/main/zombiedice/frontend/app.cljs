@@ -34,12 +34,16 @@
    (> (count name) 10)))
 
 (defn name-taken? [game-state name]
-  (some (partial = name) (get-players game-state)))
+  (some (partial = name) (map :name (get-players game-state))))
+
+(defn max-players? [game-state]
+  (<= 5 (count (get-players game-state))))
 
 (defn valid-name? [game-state name]
   (cond
-    (invalid-name-size? name)
-    (name-taken? game-state name)
+    (invalid-name-size? name) false
+    (name-taken? game-state name) false
+    (max-players? game-state) false
     :else true))
 
 (defn add-player
