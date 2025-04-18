@@ -568,12 +568,81 @@
     [list-remaining-dice game-state]
     [list-players game-state]]])
 
+;; new design start
+
+(defn card [content]
+  [:div
+   {:class "rounded-2xl border p-4 shadow-sm bg-white space-y-2"} content])
+
+(defn section-title [title]
+  [:h2 {:class "font-semibold leading-none tracking-tight"} title])
+
+(defonce state
+  (r/atom {:players [{:name "Alice" :brains 4}
+                     {:name "Bob" :brains 2}
+                     {:name "Charlie" :brains 5}]
+           :current-turn {:name "Alice" :brains 1 :shots 0 :dice-left 3}
+           :dice ["🎲" "🎲" "🎲"]}))
+
+(defn zombie-dice-ui []
+  (let [{:keys [players current-turn dice]} @state]
+    [:div {:class "p-4 space-y-4 max-w-md mx-auto"}
+     [:h1 {:class "text-xl font-bold text-center"} "Zombie Dice Game"]
+
+     ;; Players List
+     [card
+      [:<>
+       [section-title "Players"]
+       [:ul {:class "space-y-1"}
+        (for [{:keys [name brains]} players]
+          ^{:key name}
+          [:li {:class "flex justify-between text-sm"}
+           [:span name]
+           [:span (str brains " brains")]])]]]
+
+     ;; Current Turn
+     [card
+      [:<>
+       [section-title "Current Turn"]
+       [:div {:class "space-y-1 text-sm"}
+        [:div [:strong "Name: "] (:name current-turn)]
+        [:div [:strong "Brains: "] (:brains current-turn)]
+        [:div [:strong "Shots: "] (:shots current-turn)]
+        [:div [:strong "Dice Left: "] (:dice-left current-turn)]]]]
+
+     ;; Dice Display
+     [card
+      [:<>
+       [section-title "Dice Thrown"]
+       [:div {:class "flex justify-center gap-4 text-4xl"}
+        (for [d dice]
+          ^{:key d} [:span d])]]]
+
+     ;; Action Buttons
+     [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
+      [:button {:class "bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
+                :on-click #(js/alert "Roll Dice")} "Roll Dice"]
+      [:button {:class "border border-gray-300 py-2 px-4 rounded hover:bg-gray-100"
+                :on-click #(js/alert "Yield Turn")} "Yield Turn"]
+      [:button {:class "bg-destructive text-white py-2 px-4 rounded hover:bg-red-600"
+                :on-click #(js/alert "Reset Game")} "Reset Game"]]]))
+
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
-    (rc/render root (app))))
+    (rc/render root (zombie-dice-ui))))
+
+;; start is called by init and after code reloading finishes
+(defn ^:dev/after-load start []
+  (reset-game! game-state)
+  (mount-root))
 
 (defn init []
-  (reset-game! game-state)
-  (mount-root)
-  (.log js/console "Zombie Dice initialized"))
+  ;; init is called ONCE when the page loads
+  ;; this is called in the index.html and must be exported
+  ;; so it is available even in :advanced release builds
+  (.log js/console "Zombie Dice initialized")
+  (start))
 
+;; this is called before any code is reloaded
+(defn ^:dev/before-load stop []
+  (js/console.log "stop"))
