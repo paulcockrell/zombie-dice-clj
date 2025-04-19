@@ -11,6 +11,19 @@ module.exports = {
       fontFamily: {
         sans: ["Inter var", ...defaultTheme.fontFamily.sans],
       },
+      colors: {
+        primary: {
+          DEFAULT: "rgb(20 184 166 / var(--tw-bg-opacity, 1))",
+          foreground: "#ffffff",
+        },
+        secondary: {
+          DEFAULT: "rgb(240 253 250 / var(--tw-bg-opacity, 1))",
+        },
+        destructive: {
+          DEFAULT: "rgb(244 63 94 / var(--tw-bg-opacity, 1))",
+          foreground: "#ffffff",
+        },
+      },
     },
   },
   plugins: [require("@tailwindcss/forms")],

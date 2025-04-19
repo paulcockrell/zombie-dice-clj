@@ -572,10 +572,70 @@
 
 (defn card [content]
   [:div
-   {:class "rounded-2xl border p-4 shadow-sm bg-white space-y-2"} content])
+   {:class "rounded-2xl border shadow-sm bg-white space-y-2"}
+   [:div
+    {:class "flex flex-col space-y-1.5 p-6"} content]])
 
 (defn section-title [title]
   [:h2 {:class "font-semibold leading-none tracking-tight"} title])
+
+(defn section-subtitle [subtitle]
+  [:div
+   {:class "text-sm text-gray-400"} subtitle])
+
+(defn badge [text]
+  [:div
+   {:class "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary shadow cursor-default"} text])
+
+(def variant-classes
+  {:primary    "bg-primary text-primary-foreground hover:bg-primary/90"
+   :secondary  "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+   :outline    "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+   :destructive "bg-destructive text-destructive-foreground hover:bg-destructive/90"})
+
+(def base-button-classes
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors 
+   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring 
+   focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none 
+   h-10 px-4 py-2")
+
+(defn shadcn-button
+  [{:keys [label on-click variant full-width]
+    :or {variant :primary full-width true}}]
+  (let [variant-class (get variant-classes variant (:primary variant-classes))]
+    [:button
+     {:type "button"
+      :on-click on-click
+      :class (str base-button-classes " " variant-class " " (if full-width "w-full" ""))}
+     label]))
+
+(defn divider-horizontal []
+  [:div
+   {:class "shrink-0 bg-gray-200 h-[1px] w-full my-4"}])
+
+(defn invoice-table []
+  [:table {:class "w-full caption-bottom text-sm"}
+   [:thead {:class "[&_tr]:border-b"}
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:th {:class "h-10 px-2 text-left align-middle font-medium text-muted-foreground w-[100px]"}
+      "Throw #"]
+     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+      "Feet"]
+     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+      "Shotguns"]
+     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+      "Brains"]]]
+   [:tbody {:class "[&_tr:last-child]:border-0"}
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:td {:class "p-2 align-middle font-medium"} "1"]
+     [:td {:class "p-2 align-middle text-right"} "2"]
+     [:td {:class "p-2 align-middle text-right"} "1"]
+     [:td {:class "p-2 align-middle text-right"} "1"]]]
+   [:tfoot {:class "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0"}
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:td {:class "p-2 align-middle" :col-span 2} "Total"]
+     [:td {:class "p-2 align-middle text-right"} "1"]
+     [:td {:class "p-2 align-middle text-right"} "1"]]]])
 
 (defonce state
   (r/atom {:players [{:name "Alice" :brains 4}
@@ -593,39 +653,52 @@
      [card
       [:<>
        [section-title "Players"]
+       [section-subtitle "Adding a new player will reset current game"]
        [:ul {:class "space-y-1"}
         (for [{:keys [name brains]} players]
           ^{:key name}
           [:li {:class "flex justify-between text-sm"}
            [:span name]
-           [:span (str brains " brains")]])]]]
+           [:span [badge (str brains "x 🧠")]]])]
+       [divider-horizontal]
+       [:div
+        {:class "grid grid-flow-col grid-rows-1 gap-4"}
+        [:input
+         {:class "col-span-2 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+          :type "text"
+          :placeholder "Player name"}]
+        [shadcn-button {:label "Add"
+                        :variant :primary
+                        :on-click #(js/alert "The player input is hidden while game in play")}]]]]
+
+     [shadcn-button {:label "(Re)start game"
+                     :full-width true
+                     :on-click #(js/alert "Label is start game while not in play, and restart game while in play")}]
 
      ;; Current Turn
      [card
       [:<>
-       [section-title "Current Turn"]
-       [:div {:class "space-y-1 text-sm"}
-        [:div [:strong "Name: "] (:name current-turn)]
-        [:div [:strong "Brains: "] (:brains current-turn)]
-        [:div [:strong "Shots: "] (:shots current-turn)]
-        [:div [:strong "Dice Left: "] (:dice-left current-turn)]]]]
+       [section-title "Current Player: Moss"]
+       [section-subtitle "Round #5 - Turn 1 of 3"]
+       [invoice-table]]]
 
      ;; Dice Display
      [card
       [:<>
        [section-title "Dice Thrown"]
+       [section-subtitle "Throw #4 - 6 dice remaining"]
        [:div {:class "flex justify-center gap-4 text-4xl"}
         (for [d dice]
           ^{:key d} [:span d])]]]
 
      ;; Action Buttons
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
-      [:button {:class "bg-primary text-white py-2 px-4 rounded hover:bg-primary/90"
-                :on-click #(js/alert "Roll Dice")} "Roll Dice"]
-      [:button {:class "border border-gray-300 py-2 px-4 rounded hover:bg-gray-100"
-                :on-click #(js/alert "Yield Turn")} "Yield Turn"]
-      [:button {:class "bg-destructive text-white py-2 px-4 rounded hover:bg-red-600"
-                :on-click #(js/alert "Reset Game")} "Reset Game"]]]))
+      [shadcn-button {:label "Take/Roll dice"
+                      :variant :primary
+                      :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
+      [shadcn-button {:label "Yield turn"
+                      :variant :secondary
+                      :on-click #(js/alert "Yield Turn")}]]]))
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
