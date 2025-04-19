@@ -572,7 +572,7 @@
 
 (defn card [content]
   [:div
-   {:class "rounded-2xl border shadow-sm bg-white space-y-2"}
+   {:class "rounded-2xl border border-primary shadow-sm bg-white space-y-2"}
    [:div
     {:class "flex flex-col space-y-1.5 p-6"} content]])
 
@@ -698,8 +698,18 @@
        [section-title "Dice Thrown"]
        [section-subtitle "Throw #4 - 6 dice remaining"]
        [:div {:class "flex justify-center gap-4 text-4xl"}
-        (for [d dice]
-          ^{:key d} [:span d])]]]
+        [:img {:src "/images/dice-green-brains.png"
+               :alt "Descriptive text"
+               :style {:width "80px"
+                       :height "auto"}}]
+        [:img {:src "/images/dice-yellow-footsteps.png"
+               :alt "Descriptive text"
+               :style {:width "80px"
+                       :height "auto"}}]
+        [:img {:src "/images/dice-red-explosion.png"
+               :alt "Descriptive text"
+               :style {:width "80px"
+                       :height "auto"}}]]]]
 
      ;; Action Buttons
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
