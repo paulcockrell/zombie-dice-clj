@@ -13,7 +13,7 @@ module.exports = {
       },
       colors: {
         primary: {
-          DEFAULT: "rgb(20 184 166 / var(--tw-bg-opacity, 1))",
+          DEFAULT: "#8fbc8f",
           foreground: "#ffffff",
         },
         secondary: {
@@ -22,6 +22,15 @@ module.exports = {
         destructive: {
           DEFAULT: "rgb(244 63 94 / var(--tw-bg-opacity, 1))",
           foreground: "#ffffff",
+        },
+        zombie: {
+          background: "#1e1e1e", // main background
+          card: "#2a2a2a", // card containers
+          green: "#8fbc8f", // zombie flesh tone
+          red: "#cc6666", // blood accents
+          neon: "#c9f805", // radioactive green
+          text: "#f1f1f1", // primary text
+          transparent: "transparent",
         },
       },
     },

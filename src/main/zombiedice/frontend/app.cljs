@@ -585,7 +585,10 @@
 
 (defn badge [text]
   [:div
-   {:class "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary shadow cursor-default"} text])
+   {:class "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs
+    font-semibold transition-colors focus:outline-none focus:ring-2
+    focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary shadow
+    cursor-default"} text])
 
 (def variant-classes
   {:primary    "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -594,10 +597,10 @@
    :destructive "bg-destructive text-destructive-foreground hover:bg-destructive/90"})
 
 (def base-button-classes
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors 
-   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring 
-   focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none 
-   h-10 px-4 py-2")
+  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-primary/60
+   focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none
+   h-9 px-4 py-2")
 
 (defn shadcn-button
   [{:keys [label on-click variant full-width]
@@ -664,7 +667,14 @@
        [:div
         {:class "grid grid-flow-col grid-rows-1 gap-4"}
         [:input
-         {:class "col-span-2 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+         {:class "col-span-2 flex h-9 w-full rounded-md border border-primary/50 border-input
+          bg-transparent px-3 py-1 text-base shadow-sm transition-colors
+          file:border-0 file:bg-transparent file:text-sm file:font-medium
+          file:text-foreground placeholder:text-muted-foreground
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+          focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:border-primary
+          disabled:cursor-not-allowed
+          disabled:opacity-50 md:text-sm"
           :type "text"
           :placeholder "Player name"}]
         [shadcn-button {:label "Add"
@@ -697,7 +707,7 @@
                       :variant :primary
                       :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
       [shadcn-button {:label "Yield turn"
-                      :variant :secondary
+                      :variant :outline
                       :on-click #(js/alert "Yield Turn")}]]]))
 
 (defn mount-root []
