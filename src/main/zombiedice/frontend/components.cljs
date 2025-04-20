@@ -38,3 +38,21 @@
 (defn divider-horizontal []
   [:div
    {:class "shrink-0 bg-gray-200 h-[1px] w-full my-4"}])
+
+(defn input
+  [{:keys [type placeholder value on-change on-key-press]
+    :or {type "text"}}]
+  [:input
+   {:class "col-span-2 flex h-9 w-full rounded-md border border-primary/50 border-input
+          bg-transparent px-3 py-1 text-base shadow-sm transition-colors
+          file:border-0 file:bg-transparent file:text-sm file:font-medium
+          file:text-foreground placeholder:text-muted-foreground
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+          focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:border-primary
+          disabled:cursor-not-allowed
+          disabled:opacity-50 md:text-sm"
+    :type type
+    :placeholder placeholder
+    :value value
+    :on-change on-change
+    :on-key-press on-key-press}])

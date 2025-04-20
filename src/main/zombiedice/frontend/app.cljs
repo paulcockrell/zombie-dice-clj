@@ -404,35 +404,33 @@
 ;; new design start
 
 (defn score-board-table
-  ;; cols: name, position, rank, brains
-  []
-  [:table {:class "w-full caption-bottom text-sm"}
-   [:thead {:class "[&_tr]:border-b"}
-    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
-     [:th {:class "h-10 px-2 text-left align-middle font-medium text-muted-foreground w-[100px]"}
-      "Name"]
-     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
-      "Position"]
-     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
-      "Rank"]
-     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
-      "Brains"]]]
-   [:tbody {:class "[&_tr:last-child]:border-0"}
-    [:tr {:class "border-b"}
-     [:td {:class "p-2 align-middle font-medium"} "Paul"]
-     [:td {:class "p-2 align-middle text-right"} "1"]
-     [:td {:class "p-2 align-middle text-right"} "3"]
-     [:td {:class "p-2 align-middle text-right"} "1"]]
-    [:tr {:class "border-b bg-primary/10"}
-     [:td {:class "p-2 align-middle font-medium"} "Moss 🎲"]
-     [:td {:class "p-2 align-middle text-right"} "2"]
-     [:td {:class "p-2 align-middle text-right"} "1"]
-     [:td {:class "p-2 align-middle text-right"} "9"]]
-    [:tr {:class "border-b"}
-     [:td {:class "p-2 align-middle font-medium"} "Bob"]
-     [:td {:class "p-2 align-middle text-right"} "3"]
-     [:td {:class "p-2 align-middle text-right"} "2"]
-     [:td {:class "p-2 align-middle text-right"} "5"]]]])
+  "Render a table of players in the game with their accumulated brain
+  consumption tally"
+  [game-state]
+  (let [players (state/get-players @game-state)]
+    (if (< 0 (count players))
+      [:table {:class "w-full caption-bottom text-sm"}
+       [:thead {:class "[&_tr]:border-b"}
+        [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+         [:th {:class "h-10 px-2 text-left align-middle font-medium text-muted-foreground w-[100px]"}
+          "Name"]
+         [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+          "Position"]
+         [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+          "Rank"]
+         [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+          "Brains"]]]
+       [:tbody {:class "[&_tr:last-child]:border-0"}
+        (for [{:keys [name brains]} players]
+          [:tr {:key name :class "border-b bg-primary/10"}
+           [:td {:class "p-2 align-middle font-medium"} name]
+           [:td {:class "p-2 align-middle text-right"} "1"]
+           [:td {:class "p-2 align-middle text-right"} "3"]
+           [:td {:class "p-2 align-middle text-right"} brains]])]]
+      [:table {:class "w-full caption-bottom text-sm"}
+       [:tbody {:class "[&_tr:last-child]:border-0"}
+        [:tr {:class "border-b"}
+         [:td "No players - add between 2 and 8 to start"]]]])))
 
 (defn current-round-stats-table []
   [:table {:class "w-full caption-bottom text-sm"}
@@ -458,7 +456,33 @@
      [:td {:class "p-2 align-middle text-right"} "1"]
      [:td {:class "p-2 align-middle text-right"} "1"]]]])
 
-(defn zombie-dice-ui []
+(defn update-player-list [game-state new-player]
+  (let [new-game-state
+        (state/add-player @game-state @new-player)]
+    (state/save-game-state! game-state new-game-state)))
+
+(defn add-player-component
+  [game-state]
+  (let [name (r/atom "")]
+    (fn []
+      [:div
+       {:class "grid grid-flow-col grid-rows-1 gap-4"}
+       [components/input {:placeholder "Player name"
+                          :value @name
+                          :on-change #(reset! name (-> % .-target .-value))
+                          :on-key-press
+                          (fn [e]
+                            (when (= (.-key e) "Enter")
+                              (update-player-list game-state name)
+                              (reset! name "")))}]
+       [components/button {:label "Add"
+                           :variant :primary
+                           :on-click
+                           (fn []
+                             (update-player-list game-state name)
+                             (reset! name ""))}]])))
+
+(defn zombie-dice-ui [game-state]
   [:div {:class "p-4 space-y-4 max-w-md mx-auto"}
    [:h1 {:class "text-xl font-bold text-center"} "Zombie Dice"]
 
@@ -467,24 +491,11 @@
     [:<>
      [components/section-title "Score board"]
      [components/section-subtitle "The first to eat 13 brains wins the game"]
-     [score-board-table]
+     [score-board-table game-state]
      [components/divider-horizontal]
      [:div
       {:class "grid grid-flow-col grid-rows-1 gap-4"}
-      [:input
-       {:class "col-span-2 flex h-9 w-full rounded-md border border-primary/50 border-input
-          bg-transparent px-3 py-1 text-base shadow-sm transition-colors
-          file:border-0 file:bg-transparent file:text-sm file:font-medium
-          file:text-foreground placeholder:text-muted-foreground
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-          focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:border-primary
-          disabled:cursor-not-allowed
-          disabled:opacity-50 md:text-sm"
-        :type "text"
-        :placeholder "Player name"}]
-      [components/button {:label "Add"
-                          :variant :primary
-                          :on-click #(js/alert "The player input is hidden while game in play")}]]]]
+      [add-player-component game-state]]]]
 
    [components/button {:label "(Re)start game"
                        :full-width true
@@ -550,7 +561,7 @@
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
-    (rc/render root (zombie-dice-ui))))
+    (rc/render root (zombie-dice-ui state/game-state))))
 
 ;; start is called by init and after code reloading finishes
 (defn ^:dev/after-load start []
