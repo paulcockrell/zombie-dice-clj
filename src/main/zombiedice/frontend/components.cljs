@@ -38,7 +38,7 @@
 
 (defn divider-horizontal []
   [:div
-   {:class "shrink-0 bg-gray-200 h-[1px] w-full my-4"}])
+   {:class "shrink-0 bg-gray-200 h-[1px] w-full my-6"}])
 
 (defn input
   [{:keys [type placeholder value on-change on-key-press]

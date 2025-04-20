@@ -431,7 +431,7 @@
       [:table {:class "w-full caption-bottom text-sm"}
        [:tbody {:class "[&_tr:last-child]:border-0"}
         [:tr {:class "border-b"}
-         [:td "No players - add between 2 and 8 to start"]]]])))
+         [:td "No players - add between 2 and 5 to start"]]]])))
 
 (defn current-round-stats-table []
   [:table {:class "w-full caption-bottom text-sm"}
