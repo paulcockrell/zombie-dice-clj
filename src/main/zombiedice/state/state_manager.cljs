@@ -18,10 +18,33 @@
 (def initial-game-state
   {:current-dice []
    :remaining-dice []
+   :action :adding-players
    :players []
    :round 0
    :brains 0
    :shots 0})
+
+(def allowed-actions #{:adding-players :in-game :game-over})
+
+(def transition-rules
+  {:adding-players #{:in-game}
+   :in-game        #{:game-over}
+   :game-over      #{:adding-players}})
+
+(defn valid-transition? [from to]
+  (contains? (get transition-rules from #{}) to))
+
+(defn set-action! [game-state new-action]
+  (let [current-action (:action @game-state)]
+    (cond
+      (not (allowed-actions new-action))
+      (prn "Invalid action" new-action)
+
+      (not (valid-transition? current-action new-action))
+      (prn "Invalid state transition:" current-action "→" new-action)
+
+      :else
+      (swap! game-state assoc :action new-action))))
 
 (defonce game-state
   (r/atom initial-game-state))
@@ -66,7 +89,6 @@
     (let [players (get-players game-state)
           position (+ 1 (count players))
           new-player (player/init-player :name name :position position)]
-      (prn (clj->js new-player))
       (assoc game-state :players (conj players new-player)))
     (do (prn "Invalid name. Must be between 2 and 10 characters and not be taken.")
         game-state)))

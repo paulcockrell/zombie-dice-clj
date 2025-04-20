@@ -422,11 +422,12 @@
           "Brains"]]]
        [:tbody {:class "[&_tr:last-child]:border-0"}
         (for [{:keys [name position brains]} players]
-          [:tr {:key name :class "border-b bg-primary/10"}
-           [:td {:class "p-2 align-middle font-medium"} name]
-           [:td {:class "p-2 align-middle text-right"} position]
-           [:td {:class "p-2 align-middle text-right"} "3"]
-           [:td {:class "p-2 align-middle text-right"} brains]])]]
+          (let [tr-class (if (= 1 position) "border-b bg-primary/10" "border-b")]
+            [:tr {:key name :class tr-class}
+             [:td {:class "p-2 align-middle font-medium"} name]
+             [:td {:class "p-2 align-middle text-right"} position]
+             [:td {:class "p-2 align-middle text-right"} "3"]
+             [:td {:class "p-2 align-middle text-right"} brains]]))]]
       [:table {:class "w-full caption-bottom text-sm"}
        [:tbody {:class "[&_tr:last-child]:border-0"}
         [:tr {:class "border-b"}
@@ -465,41 +466,46 @@
   [game-state]
   (let [name (r/atom "")]
     (fn []
-      [:div
-       {:class "grid grid-flow-col grid-rows-1 gap-4"}
-       [components/input {:placeholder "Player name"
-                          :value @name
-                          :on-change #(reset! name (-> % .-target .-value))
-                          :on-key-press
-                          (fn [e]
-                            (when (= (.-key e) "Enter")
-                              (update-players game-state name)
-                              (reset! name "")))}]
-       [components/button {:label "Add"
-                           :variant :primary
-                           :on-click
-                           (fn []
-                             (update-players game-state name)
-                             (reset! name ""))}]])))
+      (when (= (:action @game-state) :adding-players)
+        [:<>
+         [components/divider-horizontal]
+         [:div
+          {:class "grid grid-flow-col grid-rows-1 gap-4"}
+          [components/input {:placeholder "Player name"
+                             :value @name
+                             :on-change #(reset! name (-> % .-target .-value))
+                             :on-key-press
+                             (fn [e]
+                               (when (= (.-key e) "Enter")
+                                 (update-players game-state name)
+                                 (reset! name "")))}]
+          [components/button {:label "Add"
+                              :variant :primary
+                              :on-click
+                              (fn []
+                                (update-players game-state name)
+                                (reset! name ""))}]]]))))
+
+(defn start-game-component
+  [game-state]
+  [components/button {:label (if (= (:action @game-state) :adding-players) "Start game" "Restart game")
+                      :full-width true
+                      :disabled (< (count (state/get-players @game-state)) 2)
+                      :on-click #(state/set-action! game-state :in-game)}])
 
 (defn zombie-dice-ui [game-state]
   [:div {:class "p-4 space-y-4 max-w-md mx-auto"}
    [:h1 {:class "text-xl font-bold text-center"} "Zombie Dice"]
 
-     ;; Players List
+   ;; Players List
    [components/card
     [:<>
      [components/section-title "Score board"]
      [components/section-subtitle "The first to eat 13 brains wins the game"]
      [score-board-table game-state]
-     [components/divider-horizontal]
-     [:div
-      {:class "grid grid-flow-col grid-rows-1 gap-4"}
-      [add-player-component game-state]]]]
+     [add-player-component game-state]]]
 
-   [components/button {:label "(Re)start game"
-                       :full-width true
-                       :on-click #(js/alert "Label is start game while not in play, and restart game while in play")}]
+   [start-game-component game-state]
 
    [:div
     {:class "grid grid-cols-2 grid-rows-2 gap-0"}

@@ -26,12 +26,13 @@
    h-9 px-4 py-2")
 
 (defn button
-  [{:keys [label on-click variant full-width]
-    :or {variant :primary full-width true}}]
+  [{:keys [label on-click variant full-width disabled]
+    :or {variant :primary full-width true disabled false}}]
   (let [variant-class (get variant-classes variant (:primary variant-classes))]
     [:button
      {:type "button"
       :on-click on-click
+      :disabled disabled
       :class (str base-button-classes " " variant-class " " (if full-width "w-full" ""))}
      label]))
 
