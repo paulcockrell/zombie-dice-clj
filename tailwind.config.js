@@ -17,10 +17,11 @@ module.exports = {
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "rgb(240 253 250 / var(--tw-bg-opacity, 1))",
+          DEFAULT: "#F4C542",
+          foreground: "#ffffff",
         },
         destructive: {
-          DEFAULT: "rgb(244 63 94 / var(--tw-bg-opacity, 1))",
+          DEFAULT: "#BC8F8F",
           foreground: "#ffffff",
         },
         zombie: {

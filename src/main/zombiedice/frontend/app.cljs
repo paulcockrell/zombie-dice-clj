@@ -3,6 +3,7 @@
             [zombiedice.entities.player :as player]
             [reagent.core :as r]
             [reagent.dom.client :as rc]
+            [zombiedice.frontend.components :as components]
             [cljs.core :as c]))
 
 (def initial-game-state
@@ -570,53 +571,38 @@
 
 ;; new design start
 
-(defn card [content]
-  [:div
-   {:class "rounded-2xl border border-primary shadow-sm bg-white space-y-2"}
-   [:div
-    {:class "flex flex-col space-y-1.5 p-6"} content]])
+(defn score-board-table
+  ;; cols: name, position, rank, brains
+  []
+  [:table {:class "w-full caption-bottom text-sm"}
+   [:thead {:class "[&_tr]:border-b"}
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:th {:class "h-10 px-2 text-left align-middle font-medium text-muted-foreground w-[100px]"}
+      "Name"]
+     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+      "Position"]
+     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+      "Rank"]
+     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+      "Brains"]]]
+   [:tbody {:class "[&_tr:last-child]:border-0"}
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:td {:class "p-2 align-middle font-medium"} "Paul"]
+     [:td {:class "p-2 align-middle text-right"} "1"]
+     [:td {:class "p-2 align-middle text-right"} "3"]
+     [:td {:class "p-2 align-middle text-right"} "1"]]
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:td {:class "p-2 align-middle font-medium"} "Moss"]
+     [:td {:class "p-2 align-middle text-right"} "2"]
+     [:td {:class "p-2 align-middle text-right"} "1"]
+     [:td {:class "p-2 align-middle text-right"} "9"]]
+    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+     [:td {:class "p-2 align-middle font-medium"} "Bob"]
+     [:td {:class "p-2 align-middle text-right"} "3"]
+     [:td {:class "p-2 align-middle text-right"} "2"]
+     [:td {:class "p-2 align-middle text-right"} "5"]]]])
 
-(defn section-title [title]
-  [:h2 {:class "font-semibold leading-none tracking-tight"} title])
-
-(defn section-subtitle [subtitle]
-  [:div
-   {:class "text-sm text-gray-400"} subtitle])
-
-(defn badge [text]
-  [:div
-   {:class "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs
-    font-semibold transition-colors focus:outline-none focus:ring-2
-    focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary shadow
-    cursor-default"} text])
-
-(def variant-classes
-  {:primary    "bg-primary text-primary-foreground hover:bg-primary/90"
-   :secondary  "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-   :outline    "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-   :destructive "bg-destructive text-destructive-foreground hover:bg-destructive/90"})
-
-(def base-button-classes
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
-   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-primary/60
-   focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none
-   h-9 px-4 py-2")
-
-(defn shadcn-button
-  [{:keys [label on-click variant full-width]
-    :or {variant :primary full-width true}}]
-  (let [variant-class (get variant-classes variant (:primary variant-classes))]
-    [:button
-     {:type "button"
-      :on-click on-click
-      :class (str base-button-classes " " variant-class " " (if full-width "w-full" ""))}
-     label]))
-
-(defn divider-horizontal []
-  [:div
-   {:class "shrink-0 bg-gray-200 h-[1px] w-full my-4"}])
-
-(defn invoice-table []
+(defn current-round-stats-table []
   [:table {:class "w-full caption-bottom text-sm"}
    [:thead {:class "[&_tr]:border-b"}
     [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
@@ -640,34 +626,21 @@
      [:td {:class "p-2 align-middle text-right"} "1"]
      [:td {:class "p-2 align-middle text-right"} "1"]]]])
 
-(defonce state
-  (r/atom {:players [{:name "Alice" :brains 4}
-                     {:name "Bob" :brains 2}
-                     {:name "Charlie" :brains 5}]
-           :current-turn {:name "Alice" :brains 1 :shots 0 :dice-left 3}
-           :dice ["🎲" "🎲" "🎲"]}))
-
 (defn zombie-dice-ui []
-  (let [{:keys [players current-turn dice]} @state]
-    [:div {:class "p-4 space-y-4 max-w-md mx-auto"}
-     [:h1 {:class "text-xl font-bold text-center"} "Zombie Dice Game"]
+  [:div {:class "p-4 space-y-4 max-w-md mx-auto"}
+   [:h1 {:class "text-xl font-bold text-center"} "Zombie Dice"]
 
      ;; Players List
-     [card
-      [:<>
-       [section-title "Players"]
-       [section-subtitle "Adding a new player will reset current game"]
-       [:ul {:class "space-y-1"}
-        (for [{:keys [name brains]} players]
-          ^{:key name}
-          [:li {:class "flex justify-between text-sm"}
-           [:span name]
-           [:span [badge (str brains "x 🧠")]]])]
-       [divider-horizontal]
-       [:div
-        {:class "grid grid-flow-col grid-rows-1 gap-4"}
-        [:input
-         {:class "col-span-2 flex h-9 w-full rounded-md border border-primary/50 border-input
+   [components/card
+    [:<>
+     [components/section-title "Score board"]
+     [components/section-subtitle "The first to eat 13 brains wins the game"]
+     [score-board-table]
+     [components/divider-horizontal]
+     [:div
+      {:class "grid grid-flow-col grid-rows-1 gap-4"}
+      [:input
+       {:class "col-span-2 flex h-9 w-full rounded-md border border-primary/50 border-input
           bg-transparent px-3 py-1 text-base shadow-sm transition-colors
           file:border-0 file:bg-transparent file:text-sm file:font-medium
           file:text-foreground placeholder:text-muted-foreground
@@ -675,50 +648,73 @@
           focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:border-primary
           disabled:cursor-not-allowed
           disabled:opacity-50 md:text-sm"
-          :type "text"
-          :placeholder "Player name"}]
-        [shadcn-button {:label "Add"
-                        :variant :primary
-                        :on-click #(js/alert "The player input is hidden while game in play")}]]]]
+        :type "text"
+        :placeholder "Player name"}]
+      [components/button {:label "Add"
+                          :variant :primary
+                          :on-click #(js/alert "The player input is hidden while game in play")}]]]]
 
-     [shadcn-button {:label "(Re)start game"
-                     :full-width true
-                     :on-click #(js/alert "Label is start game while not in play, and restart game while in play")}]
+   [components/button {:label "(Re)start game"
+                       :full-width true
+                       :on-click #(js/alert "Label is start game while not in play, and restart game while in play")}]
 
-     ;; Current Turn
-     [card
-      [:<>
-       [section-title "Current Player: Moss"]
-       [section-subtitle "Round #5 - Turn 1 of 3"]
-       [invoice-table]]]
+   [:div
+    {:class "grid grid-cols-2 grid-rows-2 gap-0"}
+    [:div
+     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl-lg border-primary text-left even:border sm:border sm:px-4 sm:py-2"}
+     [:span
+      {:class "text-xs text-gray-600"} "Round"]
+     [:span
+      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "5"]]
+    [:div
+     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr-lg border-primary text-left sm:border sm:border-l-0 sm:px-4 sm:py-2"}
+     [:span
+      {:class "text-xs text-gray-600"} "Turn"]
+     [:span
+      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1 of 3"]]
+    [:div
+     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
+     [:span
+      {:class "text-xs text-gray-600"} "Throw"]
+     [:span
+      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1"]]
+    [:div
+     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
+     [:span
+      {:class "text-xs text-gray-600"} "Dice remaining"]
+     [:span
+      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]]
 
-     ;; Dice Display
-     [card
-      [:<>
-       [section-title "Dice Thrown"]
-       [section-subtitle "Throw #4 - 6 dice remaining"]
-       [:div {:class "flex justify-center gap-4 text-4xl"}
-        [:img {:src "/images/dice-green-brains.png"
-               :alt "Descriptive text"
-               :style {:width "80px"
-                       :height "auto"}}]
-        [:img {:src "/images/dice-yellow-footsteps.png"
-               :alt "Descriptive text"
-               :style {:width "80px"
-                       :height "auto"}}]
-        [:img {:src "/images/dice-red-explosion.png"
-               :alt "Descriptive text"
-               :style {:width "80px"
-                       :height "auto"}}]]]]
+   [components/card
+    [:<>
+     [components/section-title "Current zombie - Moss"]
+     [current-round-stats-table]]]
+
+   [components/card
+    [:<>
+     [components/section-title "Dice thrown"]
+     [:div {:class "flex justify-center gap-4 text-4xl"}
+      [:img {:src "/images/dice-green-brains.png"
+             :alt "Descriptive text"
+             :style {:width "80px"
+                     :height "auto"}}]
+      [:img {:src "/images/dice-yellow-footsteps.png"
+             :alt "Descriptive text"
+             :style {:width "80px"
+                     :height "auto"}}]
+      [:img {:src "/images/dice-red-explosion.png"
+             :alt "Descriptive text"
+             :style {:width "80px"
+                     :height "auto"}}]]]]
 
      ;; Action Buttons
-     [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
-      [shadcn-button {:label "Take/Roll dice"
-                      :variant :primary
-                      :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
-      [shadcn-button {:label "Yield turn"
-                      :variant :outline
-                      :on-click #(js/alert "Yield Turn")}]]]))
+   [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
+    [components/button {:label "Take/Roll dice"
+                        :variant :primary
+                        :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
+    [components/button {:label "Yield turn"
+                        :variant :outline
+                        :on-click #(js/alert "Yield Turn")}]]])
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
