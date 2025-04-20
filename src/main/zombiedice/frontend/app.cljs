@@ -421,10 +421,10 @@
          [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
           "Brains"]]]
        [:tbody {:class "[&_tr:last-child]:border-0"}
-        (for [{:keys [name brains]} players]
+        (for [{:keys [name position brains]} players]
           [:tr {:key name :class "border-b bg-primary/10"}
            [:td {:class "p-2 align-middle font-medium"} name]
-           [:td {:class "p-2 align-middle text-right"} "1"]
+           [:td {:class "p-2 align-middle text-right"} position]
            [:td {:class "p-2 align-middle text-right"} "3"]
            [:td {:class "p-2 align-middle text-right"} brains]])]]
       [:table {:class "w-full caption-bottom text-sm"}
@@ -456,7 +456,7 @@
      [:td {:class "p-2 align-middle text-right"} "1"]
      [:td {:class "p-2 align-middle text-right"} "1"]]]])
 
-(defn update-player-list [game-state new-player]
+(defn update-players [game-state new-player]
   (let [new-game-state
         (state/add-player @game-state @new-player)]
     (state/save-game-state! game-state new-game-state)))
@@ -473,13 +473,13 @@
                           :on-key-press
                           (fn [e]
                             (when (= (.-key e) "Enter")
-                              (update-player-list game-state name)
+                              (update-players game-state name)
                               (reset! name "")))}]
        [components/button {:label "Add"
                            :variant :primary
                            :on-click
                            (fn []
-                             (update-player-list game-state name)
+                             (update-players game-state name)
                              (reset! name ""))}]])))
 
 (defn zombie-dice-ui [game-state]

@@ -63,9 +63,11 @@
   "Add player to the game states players key"
   [game-state name]
   (if (valid-name? game-state name)
-    (let [players (get-players game-state)]
-      (prn (str "Adding player " name))
-      (assoc game-state :players (conj players (player/init-player name))))
+    (let [players (get-players game-state)
+          position (+ 1 (count players))
+          new-player (player/init-player :name name :position position)]
+      (prn (clj->js new-player))
+      (assoc game-state :players (conj players new-player)))
     (do (prn "Invalid name. Must be between 2 and 10 characters and not be taken.")
         game-state)))
 
