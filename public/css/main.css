@@ -1019,6 +1019,15 @@ select {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
+.bg-primary\/20 {
+  background-color: rgb(143 188 143 / 0.2);
+}
+.bg-primary\/50 {
+  background-color: rgb(143 188 143 / 0.5);
+}
+.bg-primary\/10 {
+  background-color: rgb(143 188 143 / 0.1);
+}
 .p-2 {
   padding: 0.5rem;
 }
@@ -1235,6 +1244,9 @@ select {
 .hover\:bg-secondary\/80:hover {
   background-color: rgb(244 197 66 / 0.8);
 }
+.hover\:bg-primary\/20:hover {
+  background-color: rgb(143 188 143 / 0.2);
+}
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -1274,6 +1286,9 @@ select {
 }
 .disabled\:opacity-50:disabled {
   opacity: 0.5;
+}
+.data-\[state\=selected\]\:bg-primary\/20[data-state="selected"] {
+  background-color: rgb(143 188 143 / 0.2);
 }
 @media (min-width: 640px) {
 
