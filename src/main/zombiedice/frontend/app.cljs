@@ -178,7 +178,9 @@
   "Render a table of players in the game with their accumulated brain
   consumption tally"
   [game-state]
-  (let [players (state/get-players @game-state)]
+  (let [players (state/get-players-sorted @game-state)
+        current-player (state/get-current-player @game-state)]
+    (prn (clj->js players))
     (if (< 0 (count players))
       [:table {:class "w-full caption-bottom text-sm"}
        [:thead {:class "[&_tr]:border-b"}
@@ -193,7 +195,7 @@
           "Brains"]]]
        [:tbody {:class "[&_tr:last-child]:border-0"}
         (for [{:keys [name position brains]} players]
-          (let [tr-class (if (= 1 position) "border-b bg-primary/10" "border-b")]
+          (let [tr-class (if (= name (:name current-player)) "border-b bg-primary/10" "border-b")]
             [:tr {:key name :class tr-class}
              [:td {:class "p-2 align-middle font-medium"} name]
              [:td {:class "p-2 align-middle text-right"} position]
@@ -270,32 +272,33 @@
 
 (defn stats-component
   [game-state]
-  [:div
-   {:class "grid grid-cols-2 grid-rows-2 gap-0"}
-   [:div
-    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl-lg border-primary text-left even:border sm:border sm:px-4 sm:py-2"}
-    [:span
-     {:class "text-xs text-gray-600"} "Round"]
-    [:span
-     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "5"]]
-   [:div
-    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr-lg border-primary text-left sm:border sm:border-l-0 sm:px-4 sm:py-2"}
-    [:span
-     {:class "text-xs text-gray-600"} "Turn"]
-    [:span
-     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "2 of 3"]]
-   [:div
-    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
-    [:span
-     {:class "text-xs text-gray-600"} "Throw"]
-    [:span
-     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1"]]
-   [:div
-    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
-    [:span
-     {:class "text-xs text-gray-600"} "Dice remaining"]
-    [:span
-     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]])
+  (let [round (state/get-round @game-state)]
+    [:div
+     {:class "grid grid-cols-2 grid-rows-2 gap-0"}
+     [:div
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl-lg border-primary text-left even:border sm:border sm:px-4 sm:py-2"}
+      [:span
+       {:class "text-xs text-gray-600"} "Round"]
+      [:span
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} round]]
+     [:div
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr-lg border-primary text-left sm:border sm:border-l-0 sm:px-4 sm:py-2"}
+      [:span
+       {:class "text-xs text-gray-600"} "Turn"]
+      [:span
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} "2 of 3"]]
+     [:div
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
+      [:span
+       {:class "text-xs text-gray-600"} "Throw"]
+      [:span
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1"]]
+     [:div
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
+      [:span
+       {:class "text-xs text-gray-600"} "Dice remaining"]
+      [:span
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]]))
 
 (defn game-ui-component [game-state]
   (when (not= (state/get-action game-state) :adding-players)
@@ -337,7 +340,7 @@
   [components/card
    [:<>
     [components/section-title "Score board"]
-    [components/section-subtitle "The first to eat 13 brains wins the game"]
+    [components/section-subtitle "The first to eat at least 13 brains wins the game"]
     [score-board-table game-state]
     [add-player-component game-state]]])
 

@@ -55,8 +55,14 @@
       :else
       (assoc game-state :action new-action))))
 
+(defn get-round [game-state]
+  (:round game-state))
+
 (defn get-players [game-state]
   (:players game-state))
+
+(defn get-players-sorted [game-state]
+  (sort-by :position (get-players game-state)))
 
 (defn get-active-players [game-state]
   (filter (fn [p] (> 13 (:brains p))) (get-players game-state)))
