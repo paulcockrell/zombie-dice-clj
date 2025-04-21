@@ -23,15 +23,27 @@
    :action :adding-players
    :round 0})
 
-(def allowed-actions #{:adding-players :in-game :game-over})
+(defonce game-state
+  (r/atom initial-game-state))
+
+(defn save-game-state! [game-state new-game-state]
+  (reset! game-state new-game-state))
+
+(defn reset-game-state! [game-state]
+  (save-game-state! game-state initial-game-state))
+
+(def allowed-actions #{:adding-players :in-game :turn-over :game-over})
 
 (def transition-rules
   {:adding-players #{:in-game}
-   :in-game        #{:game-over}
+   :in-game        #{:turn-over :game-over}
    :game-over      #{:adding-players}})
 
 (defn valid-transition? [from to]
   (contains? (get transition-rules from #{}) to))
+
+(defn get-action [game-state]
+  (:action @game-state))
 
 (defn set-action! [game-state new-action]
   (let [current-action (:action @game-state)]
@@ -44,12 +56,6 @@
 
       :else
       (swap! game-state assoc :action new-action))))
-
-(defonce game-state
-  (r/atom initial-game-state))
-
-(defn save-game-state! [game-state new-game-state]
-  (reset! game-state new-game-state))
 
 (defn get-players [game-state]
   (:players game-state))
@@ -104,47 +110,17 @@
   be kept for the next roll and the others replaced from the pot"
   [game-state]
 
-  (let [last-round-feet-dice (dice/filter-feet (:current-dice game-state))
+  (let [last-round-feet-dice (dice/filter-feet (:current-dice @game-state))
         number-of-new-dices-to-take (if (< 0 (count last-round-feet-dice))
                                       (- 3 (count last-round-feet-dice))
                                       3)
-        [current-dice remaining-dice] (dice/take-dice (:remaining-dice game-state) number-of-new-dices-to-take)
+        [current-dice remaining-dice] (dice/take-dice (:remaining-dice @game-state) number-of-new-dices-to-take)
         new-dice (into current-dice (dice/get-colors last-round-feet-dice))]
-    (add-dice game-state (dice/roll-dices new-dice) remaining-dice)))
-
-;; Brain functions
-
-(defn get-round-brains [game-state]
-  (:brains game-state))
-
-(defn get-current-player-brains [game-state]
-  (:brains (get-current-player game-state)))
-
-(defn update-round-brains [game-state]
-  (let [current-brains (get-round-brains game-state)
-        new-brains (dice/count-brains (get-current-dice game-state))]
-    (assoc game-state :brains (+ current-brains new-brains))))
-
-(defn update-player-brains
-  "Saves current round brains to player brain tally"
-  [game-state]
-  (let [current-player (get-current-player game-state)
-        players (get-players game-state)
-        brains (get-round-brains game-state)]
-    (assoc game-state :players
-           (assoc players 0 (player/add-brains current-player brains)))))
-
-;; Shot functions
-
-(defn get-shots [game-state]
-  (:shots game-state))
-
-(defn update-round-shots [game-state]
-  (let [current-shots (get-shots game-state)
-        new-shots (dice/count-shots (get-current-dice game-state))]
-    (assoc game-state :shots (+ current-shots new-shots))))
+    (add-dice @game-state (dice/roll-dices new-dice) remaining-dice)))
 
 (defn record-throw [game-state]
+  (prn "XXX record-throw")
+  (prn (clj->js game-state))
   (let [dice (get-current-dice game-state)
         feet-count (dice/count-feet dice)
         shot-count (dice/count-shots dice)
@@ -166,14 +142,26 @@
           maps))
 
 (defn get-throw-totals [game-state]
-  (merge-sum (:throws @game-state)))
+  (merge-sum (:throws game-state)))
+
+(defn get-current-player-brains [game-state]
+  (:brains (get-current-player game-state)))
+
+(defn update-player-brains
+  "Saves current round brains to player brain tally"
+  [game-state]
+  (let [current-player (get-current-player game-state)
+        players (get-players game-state)
+        brains (:brains (get-throw-totals game-state))]
+    (assoc game-state :players
+           (assoc players 0 (player/add-brains current-player brains)))))
 
 (defn process-hand [game-state]
+  (prn "XX process-hand")
+  (prn (clj->js game-state))
   (-> game-state
       (roll-dice)
-      (record-throw)
-      (update-round-shots)
-      (update-round-brains)))
+      (record-throw)))
 
 (defn move-current-player-to-last [game-state]
   (let [players (get-active-players game-state)]
@@ -194,9 +182,13 @@
   game-state)
 
 (defn check-hand [game-state]
-  (let [player-total-brains (+ (get-current-player-brains game-state) (get-round-brains game-state))
-        shots (get-shots game-state)]
+  (prn "XXX check hand")
+  (prn (clj->js game-state))
+  (let [current-player-brains (get-current-player-brains game-state)
+        throw-brains (:brains (get-throw-totals game-state))
+        throw-shots (:shots (get-throw-totals game-state))
+        player-total-brains (+ current-player-brains throw-brains)]
     (cond
-      (<= 3 shots) (loose-round game-state)
+      (<= 3 throw-shots) (loose-round game-state)
       (<= 13 player-total-brains) (win-round game-state)
       :else game-state)))
