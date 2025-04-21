@@ -18,12 +18,10 @@
 (def initial-game-state
   {:current-dice []
    :remaining-dice []
-   :action :adding-players
    :players []
-   :round 0
    :throws () ;; list of maps recording dice faces
-   :brains 0
-   :shots 0})
+   :action :adding-players
+   :round 0})
 
 (def allowed-actions #{:adding-players :in-game :game-over})
 
@@ -154,6 +152,9 @@
         current-throws (:throws game-state)
         new-throw {:throw (+ 1 (count current-throws)) :feet feet-count :shots shot-count :brains brain-count}]
     (assoc game-state :throws (cons new-throw current-throws))))
+
+(defn reset-throws [game-state]
+  (assoc game-state :throws ()))
 
 (defn get-throws [game-state]
   (:throws @game-state))

@@ -11,8 +11,7 @@
         (-> @game-state
             (state/update-player-brains)
             (state/move-current-player-to-last)
-            (state/reset-shots)
-            (state/reset-brains)
+            (state/reset-throws)
             (state/update-round-counter)
             (state/add-dice (dice/init-dice)))]
     (state/save-game-state! game-state new-game-state)))
@@ -556,10 +555,10 @@
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
       [components/button {:label "Take/Roll dice"
                           :variant :primary
-                          :on-click (fn [] (play-hand! game-state))}]
+                          :on-click #(play-hand! game-state)}]
       [components/button {:label "Yield turn"
                           :variant :outline
-                          :on-click #(js/alert "Yield Turn")}]]]))
+                          :on-click #(yield-turn! game-state)}]]]))
 
 (defn players-ui-component [game-state]
   [components/card
