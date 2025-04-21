@@ -307,10 +307,11 @@
     [:<>
      [stats-component game-state]
 
-     [components/card
-      [:<>
-       [components/section-title "Current zombie - Moss"]
-       [current-round-stats-table game-state]]]
+     (let [player-name (:name (state/get-current-player @game-state) "n/a")]
+       [components/card
+        [:<>
+         [components/section-title (str "Current zombie - " player-name)]
+         [current-round-stats-table game-state]]])
 
      [components/card
       [:<>
