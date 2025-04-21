@@ -433,29 +433,33 @@
         [:tr {:class "border-b"}
          [:td "No players - add between 2 and 5 to start"]]]])))
 
-(defn current-round-stats-table []
-  [:table {:class "w-full caption-bottom text-sm"}
-   [:thead {:class "[&_tr]:border-b"}
-    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
-     [:th {:class "h-10 px-2 text-left align-middle font-medium text-muted-foreground w-[100px]"}
-      "Throw"]
-     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
-      "Feet"]
-     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
-      "Shotguns"]
-     [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
-      "Brains"]]]
-   [:tbody {:class "[&_tr:last-child]:border-0"}
-    [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
-     [:td {:class "p-2 align-middle font-medium"} "1"]
-     [:td {:class "p-2 align-middle text-right"} "2"]
-     [:td {:class "p-2 align-middle text-right"} "1"]
-     [:td {:class "p-2 align-middle text-right"} "1"]]]
-   [:tfoot {:class "border-t bg-primary/10 font-medium [&>tr]:last:border-b-0"}
-    [:tr {:class "border-b"}
-     [:td {:class "p-2 align-middle" :col-span 2} "Total"]
-     [:td {:class "p-2 align-middle text-right"} "1"]
-     [:td {:class "p-2 align-middle text-right"} "1"]]]])
+(defn current-round-stats-table [game-state]
+  (let [throws (state/get-throws game-state)
+        throw-totals (state/get-throw-totals game-state)]
+    [:table {:class "w-full caption-bottom text-sm"}
+     [:thead {:class "[&_tr]:border-b"}
+      [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+       [:th {:class "h-10 px-2 text-left align-middle font-medium text-muted-foreground w-[100px]"}
+        "Throw"]
+       [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+        "Feet"]
+       [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+        "Shotguns"]
+       [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
+        "Brains"]]]
+     [:tbody {:class "[&_tr:last-child]:border-0"}
+      (for [{:keys [throw feet shots brains]} throws]
+        ^{:key (random-uuid)} [:tr {:class "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"}
+                               [:td {:class "p-2 align-middle font-medium"} throw]
+                               [:td {:class "p-2 align-middle text-right"} feet]
+                               [:td {:class "p-2 align-middle text-right"} shots]
+                               [:td {:class "p-2 align-middle text-right"} brains]])]
+     [:tfoot {:class "border-t bg-primary/10 font-medium [&>tr]:last:border-b-0"}
+      [:tr {:class "border-b"}
+       [:td {:class "p-2 align-middle"} "Total"]
+       [:td {:class "p-2 align-middle text-right"} (:feet throw-totals)]
+       [:td {:class "p-2 align-middle text-right"} (:shots throw-totals)]
+       [:td {:class "p-2 align-middle text-right"} (:brains throw-totals)]]]]))
 
 (defn update-players [game-state new-player]
   (let [new-game-state
@@ -530,7 +534,7 @@
      [components/card
       [:<>
        [components/section-title "Current zombie - Moss"]
-       [current-round-stats-table]]]
+       [current-round-stats-table game-state]]]
 
      [components/card
       [:<>
@@ -552,7 +556,7 @@
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
       [components/button {:label "Take/Roll dice"
                           :variant :primary
-                          :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
+                          :on-click (fn [] (play-hand! game-state))}]
       [components/button {:label "Yield turn"
                           :variant :outline
                           :on-click #(js/alert "Yield Turn")}]]]))

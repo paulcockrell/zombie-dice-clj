@@ -21,6 +21,7 @@
    :action :adding-players
    :players []
    :round 0
+   :throws () ;; list of maps recording dice faces
    :brains 0
    :shots 0})
 
@@ -151,6 +152,27 @@
 (defn reset-shots [game-state]
   (assoc game-state :shots 0))
 
+(defn record-throw [game-state]
+  (let [dice (get-current-dice game-state)
+        feet-count (dice/count-feet dice)
+        shot-count (dice/count-shots dice)
+        brain-count (dice/count-brains dice)
+        current-throws (:throws game-state)
+        new-throw {:throw (+ 1 (count current-throws)) :feet feet-count :shots shot-count :brains brain-count}]
+    (assoc game-state :throws (cons new-throw current-throws))))
+
+(defn get-throws [game-state]
+  (:throws @game-state))
+
+(defn- merge-sum [maps]
+  (reduce (fn [acc m]
+            (merge-with + acc m))
+          {}
+          maps))
+
+(defn get-throw-totals [game-state]
+  (merge-sum (:throws @game-state)))
+
 ;; Player functions
 
 (defn list-players [game-state]
@@ -176,6 +198,7 @@
 (defn process-hand [game-state]
   (-> game-state
       (roll-dice)
+      (record-throw)
       (update-round-shots)
       (update-round-brains)))
 
