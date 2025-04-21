@@ -13,7 +13,8 @@
             (state/move-current-player-to-last)
             (state/reset-throws)
             (state/update-round-counter)
-            (state/add-dice (dice/init-dice)))]
+            (state/add-dice (dice/init-dice))
+            (state/set-action :in-game))]
     (state/save-game-state! game-state new-game-state)))
 
 (defn reset-game! [game-state]
@@ -265,7 +266,7 @@
   [components/button {:label (if (= (:action @game-state) :adding-players) "Start game" "Restart game")
                       :full-width true
                       :disabled (< (count (state/get-players @game-state)) 2)
-                      :on-click #(state/set-action! game-state :in-game)}])
+                      :on-click #(state/start-game! game-state)}])
 
 (defn stats-component
   [game-state]
@@ -324,8 +325,9 @@
                        :height "auto"}}]]]]
 
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
-      [components/button {:label "Take/Roll dice"
+      [components/button {:label "Roll dice"
                           :variant :primary
+                          :disabled (= (:action @game-state) :turn-over)
                           :on-click #(play-turn! game-state)}]
       [components/button {:label "Yield turn"
                           :variant :outline
