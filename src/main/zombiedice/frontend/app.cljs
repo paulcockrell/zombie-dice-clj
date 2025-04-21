@@ -375,31 +375,31 @@
        [:img
         {:src "../images/app-page/socials/linkedin.svg", :alt ""}]]]]]])
 
-(defn app []
-  [:div
-   [:div.columns.is-multiline]
-   [navbar-component]
-   [:section.section
-    [:div.container
-     [header-component state/game-state]]
-    [:div.columns.is-multiline
-     [current-player-component state/game-state]
-     [mobile-component]
-     [list-players-component state/game-state]]]
-   [footer-component]
-   [:section.section
-    [:div.buttons
-     [roll-dice-btn state/game-state]
-     [yield-turn-btn state/game-state]
-     [reset-game-btn state/game-state]]]
-   [:section.section
-    [state/show-current-player state/game-state]
-    [state/show-round-brains state/game-state]
-    [state/show-round-shots state/game-state]]
-   [:section.section
-    [show-current-hand state/game-state]
-    [list-remaining-dice state/game-state]
-    [state/list-players state/game-state]]])
+;; (defn app []
+;;   [:div
+;;    [:div.columns.is-multiline]
+;;    [navbar-component]
+;;    [:section.section
+;;     [:div.container
+;;      [header-component state/game-state]]
+;;     [:div.columns.is-multiline
+;;      [current-player-component state/game-state]
+;;      [mobile-component]
+;;      [list-players-component state/game-state]]]
+;;    [footer-component]
+;;    [:section.section
+;;     [:div.buttons
+;;      [roll-dice-btn state/game-state]
+;;      [yield-turn-btn state/game-state]
+;;      [reset-game-btn state/game-state]]]
+;;    [:section.section
+;;     [state/show-current-player state/game-state]
+;;     [state/show-round-brains state/game-state]
+;;     [state/show-round-shots state/game-state]]
+;;    [:section.section
+;;     [show-current-hand state/game-state]
+;;     [list-remaining-dice state/game-state]
+;;     [state/list-players state/game-state]]])
 
 ;; new design start
 

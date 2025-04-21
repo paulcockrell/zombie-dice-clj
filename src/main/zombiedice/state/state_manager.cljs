@@ -127,9 +127,6 @@
         new-brains (dice/count-brains (get-current-dice game-state))]
     (assoc game-state :brains (+ current-brains new-brains))))
 
-(defn reset-brains [game-state]
-  (assoc game-state :brains 0))
-
 (defn update-player-brains
   "Saves current round brains to player brain tally"
   [game-state]
@@ -148,9 +145,6 @@
   (let [current-shots (get-shots game-state)
         new-shots (dice/count-shots (get-current-dice game-state))]
     (assoc game-state :shots (+ current-shots new-shots))))
-
-(defn reset-shots [game-state]
-  (assoc game-state :shots 0))
 
 (defn record-throw [game-state]
   (let [dice (get-current-dice game-state)
@@ -173,28 +167,6 @@
 (defn get-throw-totals [game-state]
   (merge-sum (:throws @game-state)))
 
-;; Player functions
-
-(defn list-players [game-state]
-  (let [players (get-players @game-state)]
-    [:div "Players:"
-     [:ul
-      (for [{:keys [name brains]} players]
-        ^{:key (random-uuid)} [:li (str name " has eaten " brains " brains.")])]]))
-
-(defn show-current-player [game-state]
-  (let [current-player (get-current-player @game-state)]
-    [:div "Current player: "
-     (str (:name current-player))]))
-
-(defn show-round-brains [game-state]
-  [:div "Current brains eaten: "
-   (get-round-brains @game-state)])
-
-(defn show-round-shots [game-state]
-  [:div "Current shots taken: "
-   (get-shots @game-state)])
-
 (defn process-hand [game-state]
   (-> game-state
       (roll-dice)
@@ -213,8 +185,6 @@
   (prn "Oh no you got shot too many times, you loose all your brains from this round!")
   (-> game-state
       (move-current-player-to-last)
-      (reset-shots)
-      (reset-brains)
       (update-round-counter)
       (add-dice (dice/init-dice))))
 
