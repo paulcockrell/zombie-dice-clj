@@ -110,13 +110,13 @@
   be kept for the next roll and the others replaced from the pot"
   [game-state]
 
-  (let [last-round-feet-dice (dice/filter-feet (:current-dice @game-state))
+  (let [last-round-feet-dice (dice/filter-feet (:current-dice game-state))
         number-of-new-dices-to-take (if (< 0 (count last-round-feet-dice))
                                       (- 3 (count last-round-feet-dice))
                                       3)
-        [current-dice remaining-dice] (dice/take-dice (:remaining-dice @game-state) number-of-new-dices-to-take)
+        [current-dice remaining-dice] (dice/take-dice (:remaining-dice game-state) number-of-new-dices-to-take)
         new-dice (into current-dice (dice/get-colors last-round-feet-dice))]
-    (add-dice @game-state (dice/roll-dices new-dice) remaining-dice)))
+    (add-dice game-state (dice/roll-dices new-dice) remaining-dice)))
 
 (defn record-throw [game-state]
   (prn "XXX record-throw")

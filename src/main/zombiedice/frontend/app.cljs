@@ -16,19 +16,15 @@
             (state/add-dice (dice/init-dice)))]
     (state/save-game-state! game-state new-game-state)))
 
-(defn reset-game!
-  "Reset the game state"
-  [game-state]
+(defn reset-game! [game-state]
   (let [new-game-state
-        (-> (state/reset-game-state! game-state)
+        (-> state/initial-game-state
             (state/add-dice (dice/init-dice)))]
     (state/save-game-state! game-state new-game-state)))
 
-(defn play-hand! [game-state]
-  (prn "XXX play-hand")
-  (prn (clj->js game-state))
+(defn play-turn! [game-state]
   (let [new-game-state
-        (-> game-state
+        (-> @game-state
             (state/process-hand)
             (state/check-hand))]
     (state/save-game-state! game-state new-game-state)))
@@ -63,7 +59,7 @@
    "Yield turn"])
 
 (defn roll-dice-btn [game-state]
-  [:button.button.is-primary {:on-click (fn [] (play-hand! game-state)) :disabled (or
+  [:button.button.is-primary {:on-click (fn [] (play-turn! game-state)) :disabled (or
                                                                                    (= 0 (count (state/get-active-players @game-state)))
                                                                                    (= 0 (count (:remaining-dice @game-state))))}
    "Roll dice..."])
@@ -330,7 +326,7 @@
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
       [components/button {:label "Take/Roll dice"
                           :variant :primary
-                          :on-click #(play-hand! game-state)}]
+                          :on-click #(play-turn! game-state)}]
       [components/button {:label "Yield turn"
                           :variant :outline
                           :on-click #(yield-turn! game-state)}]]]))
