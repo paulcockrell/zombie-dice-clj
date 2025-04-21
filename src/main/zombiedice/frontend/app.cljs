@@ -426,7 +426,7 @@
             [:tr {:key name :class tr-class}
              [:td {:class "p-2 align-middle font-medium"} name]
              [:td {:class "p-2 align-middle text-right"} position]
-             [:td {:class "p-2 align-middle text-right"} "3"]
+             [:td {:class "p-2 align-middle text-right"} 0]
              [:td {:class "p-2 align-middle text-right"} brains]]))]]
       [:table {:class "w-full caption-bottom text-sm"}
        [:tbody {:class "[&_tr:last-child]:border-0"}
@@ -493,77 +493,84 @@
                       :disabled (< (count (state/get-players @game-state)) 2)
                       :on-click #(state/set-action! game-state :in-game)}])
 
+(defn stats-component
+  [game-state]
+  [:div
+   {:class "grid grid-cols-2 grid-rows-2 gap-0"}
+   [:div
+    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl-lg border-primary text-left even:border sm:border sm:px-4 sm:py-2"}
+    [:span
+     {:class "text-xs text-gray-600"} "Round"]
+    [:span
+     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "5"]]
+   [:div
+    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr-lg border-primary text-left sm:border sm:border-l-0 sm:px-4 sm:py-2"}
+    [:span
+     {:class "text-xs text-gray-600"} "Turn"]
+    [:span
+     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "2 of 3"]]
+   [:div
+    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
+    [:span
+     {:class "text-xs text-gray-600"} "Throw"]
+    [:span
+     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1"]]
+   [:div
+    {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
+    [:span
+     {:class "text-xs text-gray-600"} "Dice remaining"]
+    [:span
+     {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]])
+
+(defn game-ui-component [game-state]
+  (when (not= (:action @game-state) :adding-players)
+    [:<>
+     [stats-component game-state]
+
+     [components/card
+      [:<>
+       [components/section-title "Current zombie - Moss"]
+       [current-round-stats-table]]]
+
+     [components/card
+      [:<>
+       [components/section-title "Dice thrown"]
+       [:div {:class "flex justify-center gap-4 text-4xl"}
+        [:img {:src "/images/dice-green-brains.png"
+               :alt "Descriptive text"
+               :style {:width "80px"
+                       :height "auto"}}]
+        [:img {:src "/images/dice-yellow-footsteps.png"
+               :alt "Descriptive text"
+               :style {:width "80px"
+                       :height "auto"}}]
+        [:img {:src "/images/dice-red-explosion.png"
+               :alt "Descriptive text"
+               :style {:width "80px"
+                       :height "auto"}}]]]]
+
+     [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
+      [components/button {:label "Take/Roll dice"
+                          :variant :primary
+                          :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
+      [components/button {:label "Yield turn"
+                          :variant :outline
+                          :on-click #(js/alert "Yield Turn")}]]]))
+
+(defn players-ui-component [game-state]
+  [components/card
+   [:<>
+    [components/section-title "Score board"]
+    [components/section-subtitle "The first to eat 13 brains wins the game"]
+    [score-board-table game-state]
+    [add-player-component game-state]]])
+
 (defn zombie-dice-ui [game-state]
   [:div {:class "p-4 space-y-4 max-w-md mx-auto"}
    [:h1 {:class "text-xl font-bold text-center"} "Zombie Dice"]
-
-   ;; Players List
-   [components/card
-    [:<>
-     [components/section-title "Score board"]
-     [components/section-subtitle "The first to eat 13 brains wins the game"]
-     [score-board-table game-state]
-     [add-player-component game-state]]]
-
+   [players-ui-component game-state]
    [start-game-component game-state]
-
-   [:div
-    {:class "grid grid-cols-2 grid-rows-2 gap-0"}
-    [:div
-     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl-lg border-primary text-left even:border sm:border sm:px-4 sm:py-2"}
-     [:span
-      {:class "text-xs text-gray-600"} "Round"]
-     [:span
-      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "5"]]
-    [:div
-     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr-lg border-primary text-left sm:border sm:border-l-0 sm:px-4 sm:py-2"}
-     [:span
-      {:class "text-xs text-gray-600"} "Turn"]
-     [:span
-      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "2 of 3"]]
-    [:div
-     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
-     [:span
-      {:class "text-xs text-gray-600"} "Throw"]
-     [:span
-      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1"]]
-    [:div
-     {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
-     [:span
-      {:class "text-xs text-gray-600"} "Dice remaining"]
-     [:span
-      {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]]
-
-   [components/card
-    [:<>
-     [components/section-title "Current zombie - Moss"]
-     [current-round-stats-table]]]
-
-   [components/card
-    [:<>
-     [components/section-title "Dice thrown"]
-     [:div {:class "flex justify-center gap-4 text-4xl"}
-      [:img {:src "/images/dice-green-brains.png"
-             :alt "Descriptive text"
-             :style {:width "80px"
-                     :height "auto"}}]
-      [:img {:src "/images/dice-yellow-footsteps.png"
-             :alt "Descriptive text"
-             :style {:width "80px"
-                     :height "auto"}}]
-      [:img {:src "/images/dice-red-explosion.png"
-             :alt "Descriptive text"
-             :style {:width "80px"
-                     :height "auto"}}]]]]
-
-     ;; Action Buttons
-   [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
-    [components/button {:label "Take/Roll dice"
-                        :variant :primary
-                        :on-click #(js/alert "Button initally shows Take dice, where you know the colors of the dice, it then changes to Roll dice so you can throw")}]
-    [components/button {:label "Yield turn"
-                        :variant :outline
-                        :on-click #(js/alert "Yield Turn")}]]])
+   [game-ui-component game-state]])
 
 (defn mount-root []
   (let [root (rc/create-root (.getElementById js/document "root"))]
