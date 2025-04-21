@@ -30,7 +30,7 @@
             (state/check-hand))]
     (state/save-game-state! game-state new-game-state)))
 
-(defn list-current-dice [game-state]
+(defn list-current-dice-x [game-state]
   (let [dices (state/get-current-dice @game-state)]
     [:ul
      (for [dice dices]
@@ -302,6 +302,15 @@
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]]))
 
+(defn current-dice-component [game-state]
+  (let [dices (state/get-current-dice @game-state)]
+    [:div {:class "flex justify-center gap-4 text-4xl"}
+     (for [dice dices]
+       ^{:key (random-uuid)} [:img {:src (str "/images/dice-" (name (:color dice)) "-" (name (:face dice)) ".png")
+                                    :alt "Descriptive text"
+                                    :style {:width "80px"
+                                            :height "auto"}}])]))
+
 (defn game-ui-component [game-state]
   (when (not= (state/get-action game-state) :adding-players)
     [:<>
@@ -316,19 +325,7 @@
      [components/card
       [:<>
        [components/section-title "Dice thrown"]
-       [:div {:class "flex justify-center gap-4 text-4xl"}
-        [:img {:src "/images/dice-green-brains.png"
-               :alt "Descriptive text"
-               :style {:width "80px"
-                       :height "auto"}}]
-        [:img {:src "/images/dice-yellow-footsteps.png"
-               :alt "Descriptive text"
-               :style {:width "80px"
-                       :height "auto"}}]
-        [:img {:src "/images/dice-red-explosion.png"
-               :alt "Descriptive text"
-               :style {:width "80px"
-                       :height "auto"}}]]]]
+       [current-dice-component game-state]]]
 
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
       [components/button {:label "Roll dice"
