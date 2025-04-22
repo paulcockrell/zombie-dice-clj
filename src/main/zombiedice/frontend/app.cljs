@@ -45,7 +45,7 @@
 
 (defn show-current-hand [game-state]
   [:div "Current hand: "
-   (list-current-dice game-state)])
+   (list-current-dice-x game-state)])
 
 (defn reset-game-btn [game-state]
   [:button.button.is-danger {:on-click (fn [] (reset-game! game-state))}
@@ -180,7 +180,6 @@
   [game-state]
   (let [players (state/get-players-sorted @game-state)
         current-player (state/get-current-player @game-state)]
-    (prn (clj->js players))
     (if (< 0 (count players))
       [:table {:class "w-full caption-bottom text-sm"}
        [:thead {:class "[&_tr]:border-b"}
@@ -274,7 +273,11 @@
 
 (defn stats-component
   [game-state]
-  (let [round (state/get-round @game-state)]
+  (let [round (state/get-round @game-state)
+        players-count (count (state/get-players @game-state))
+        current-player (state/get-current-player @game-state)
+        player-position (:position current-player)
+        remaining-dice (count (:remaining-dice @game-state))]
     [:div
      {:class "grid grid-cols-2 grid-rows-2 gap-0"}
      [:div
@@ -288,19 +291,19 @@
       [:span
        {:class "text-xs text-gray-600"} "Turn"]
       [:span
-       {:class "text-lg font-bold leading-none sm:text-lg text-center"} "2 of 3"]]
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} (str player-position " of " players-count)]]
      [:div
       {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
       [:span
        {:class "text-xs text-gray-600"} "Throw"]
       [:span
-       {:class "text-lg font-bold leading-none sm:text-lg text-center"} "1"]]
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} (count (:throws @game-state))]]
      [:div
       {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
       [:span
        {:class "text-xs text-gray-600"} "Dice remaining"]
       [:span
-       {:class "text-lg font-bold leading-none sm:text-lg text-center"} "6"]]]))
+       {:class "text-lg font-bold leading-none sm:text-lg text-center"} remaining-dice]]]))
 
 (defn current-dice-component [game-state]
   (let [dices (state/get-current-dice @game-state)]
@@ -330,7 +333,7 @@
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
       [components/button {:label "Roll dice"
                           :variant :primary
-                          :disabled (= (:action @game-state) :turn-over)
+                          :disabled (or (= (:action @game-state) :turn-over) (<= (count (:remaining-dice @game-state)) 0))
                           :on-click #(play-turn! game-state)}]
       [components/button {:label "Yield turn"
                           :variant :outline
@@ -369,4 +372,4 @@
 
 ;; this is called before any code is reloaded
 (defn ^:dev/before-load stop []
-  (js/console.log "stop"))
+  (prn "stop"))

@@ -21,7 +21,7 @@
    :players []
    :throws () ;; list of maps recording dice faces
    :action :adding-players
-   :round 0})
+   :round 1})
 
 (defonce game-state
   (r/atom initial-game-state))
@@ -172,7 +172,9 @@
     (assoc game-state :players (vec (concat (rest players) [(first players)])))))
 
 (defn update-round-counter [game-state]
-  (assoc game-state :round (inc (:round game-state))))
+  (if (= 1 (:position (get-current-player game-state)))
+    (assoc game-state :round (inc (:round game-state)))
+    game-state))
 
 (defn start-game! [game-state]
   (let [new-state (set-action @game-state :in-game)]
