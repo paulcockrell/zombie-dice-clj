@@ -30,149 +30,23 @@
             (state/check-hand))]
     (state/save-game-state! game-state new-game-state)))
 
-(defn list-current-dice-x [game-state]
-  (let [dices (state/get-current-dice @game-state)]
-    [:ul
-     (for [dice dices]
-       ^{:key (random-uuid)} [:li (str "Color: " (:color dice) ", face: " (:face dice))])]))
-
-(defn list-remaining-dice [game-state]
-  (let [dices (:remaining-dice @game-state)]
-    [:div "Remaining dice: "
-     [:ul
-      (for [dice dices]
-        ^{:key (random-uuid)} [:li dice])]]))
-
-(defn show-current-hand [game-state]
-  [:div "Current hand: "
-   (list-current-dice-x game-state)])
-
-(defn reset-game-btn [game-state]
-  [:button.button.is-danger {:on-click (fn [] (reset-game! game-state))}
-   "Restart"])
-
-(defn yield-turn-btn [game-state]
-  [:button.button.is-warning {:on-click
-                              (fn []
-                                (yield-turn! game-state))
-                              :disabled
-                              (= 0 (count (state/get-players @game-state)))}
-   "Yield turn"])
-
-(defn roll-dice-btn [game-state]
-  [:button.button.is-primary {:on-click (fn [] (play-turn! game-state)) :disabled (or
-                                                                                   (= 0 (count (state/get-active-players @game-state)))
-                                                                                   (= 0 (count (:remaining-dice @game-state))))}
-   "Roll dice..."])
-
-(defn navbar-component []
-  [:nav
-   {:class "navbar py-4"}
+(defn looser-alert-component [game-state]
+  [:div
+   {:class "bg-secondary/50 border-b border-secondary/40 text-amber-700 text-sm p-4 flex justify-between"}
    [:div
-    {:class "container is-fluid"}
-    [:div
-     {:class "navbar-brand"}
-     [:a
-      {:class "navbar-item", :href "#"}
-      [:img
-       {:class "image",
-        :src "https://bulma.io/images/bulma-logo.png",
-        :alt "",
-        :width "96px"}]]
-     [:a
-      {:class "navbar-burger",
-       :role "button",
-       :aria-label "menu",
-       :aria-expanded "false"}
-      [:span {:aria-hidden "true"}]
-      [:span {:aria-hidden "true"}]
-      [:span {:aria-hidden "true"}]]]
-    [:div
-     {:class "navbar-menu"}
-     [:div
-      {:class "navbar-start"}
-      [:a {:class "navbar-item", :href "#"} "About"]
-      [:a {:class "navbar-item", :href "#"} "Company"]
-      [:a {:class "navbar-item", :href "#"} "Services"]
-      [:a {:class "navbar-item", :href "#"} "Testimonials"]]
-     [:div
-      {:class "navbar-item"}
-      [:div
-       {:class "field has-addons"}
-       [:div
-        {:class "control"}
-        [:input
-         {:class "input",
-          :type "search",
-          :placeholder "Search",
-          :aria-label "Search"}]]
-       [:div
-        {:class "control"}
-        [:button
-         {:class "button", :type "submit"}
-         [:svg
-          {:xmlns "http://www.w3.org/2000/svg",
-           :fill "none",
-           :viewBox "0 0 24 24",
-           :stroke "currentColor",
-           :style {:width "24px", :height "24px"}}
-          [:path
-           {:stroke-linecap "round",
-            :stroke-linejoin "round",
-            :stroke-width "2",
-            :d "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"}]]]]]]]]])
+    [:div.flex.items-center
+     [:span.pr-4 "💥"]
+     [:p
+      (str (:name (state/get-current-player @game-state)) " has been shot too many times!")]]]])
 
-(defn update-player-list [game-state new-player]
-  (let [new-game-state
-        (state/add-player @game-state @new-player)]
-    (state/save-game-state! game-state new-game-state)))
-
-(defn player-input [value]
-  [:input {:type "text"
-           :value @value
-           :class "input"
-           :placeholder "Player name"
-           :on-change #(reset! value (-> % .-target .-value))
-           :on-key-press
-           (fn [e]
-             (when (= (.-key e) "Enter")
-               (update-player-list state/game-state value)
-               (reset! value "")))}])
-
-(defn player-input-save [game-state value]
-  [:button.button.is-primary {:on-click
-                              (fn []
-                                (update-player-list game-state value)
-                                (reset! value ""))}
-   "Add player"])
-
-;; (defn app []
-;;   [:div
-;;    [:div.columns.is-multiline]
-;;    [navbar-component]
-;;    [:section.section
-;;     [:div.container
-;;      [header-component state/game-state]]
-;;     [:div.columns.is-multiline
-;;      [current-player-component state/game-state]
-;;      [mobile-component]
-;;      [list-players-component state/game-state]]]
-;;    [footer-component]
-;;    [:section.section
-;;     [:div.buttons
-;;      [roll-dice-btn state/game-state]
-;;      [yield-turn-btn state/game-state]
-;;      [reset-game-btn state/game-state]]]
-;;    [:section.section
-;;     [state/show-current-player state/game-state]
-;;     [state/show-round-brains state/game-state]
-;;     [state/show-round-shots state/game-state]]
-;;    [:section.section
-;;     [show-current-hand state/game-state]
-;;     [list-remaining-dice state/game-state]
-;;     [state/list-players state/game-state]]])
-
-;; new design start
+(defn winner-alert-component [game-state]
+  [:div
+   {:class "bg-primary/50 border-b border-primary/40 text-lime-700 text-sm p-4 flex justify-between"}
+   [:div
+    [:div.flex.items-center
+     [:span.pr-4 "🧟‍♂️"]
+     [:p
+      (str (:name (state/get-current-player @game-state)) " has won!")]]]])
 
 (defn score-board-table
   "Render a table of players in the game with their accumulated brain
@@ -330,13 +204,20 @@
        [components/section-title "Dice thrown"]
        [current-dice-component game-state]]]
 
+     (when (= (state/get-action game-state) :turn-over)
+       [looser-alert-component game-state])
+
+     (when (= (state/get-action game-state) :game-over)
+       [winner-alert-component game-state])
+
      [:div {:class "flex flex-col sm:flex-row gap-2 justify-around"}
       [components/button {:label "Roll dice"
                           :variant :primary
-                          :disabled (or (= (:action @game-state) :turn-over) (<= (count (:remaining-dice @game-state)) 0))
+                          :disabled (or (= (:action @game-state) :turn-over) (<= (count (:remaining-dice @game-state)) 0) (= (state/get-action game-state) :game-over))
                           :on-click #(play-turn! game-state)}]
       [components/button {:label "Yield turn"
                           :variant :outline
+                          :disabled (= (state/get-action game-state) :game-over)
                           :on-click #(yield-turn! game-state)}]]]))
 
 (defn players-ui-component [game-state]

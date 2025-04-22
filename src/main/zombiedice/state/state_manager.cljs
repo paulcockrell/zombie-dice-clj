@@ -186,7 +186,7 @@
 
 (defn win-game [game-state]
   (prn (str "Player " (:name (get-current-player game-state)) " has won the game!"))
-  game-state)
+  (set-action game-state :game-over))
 
 (defn check-hand [game-state]
   (let [current-player-brains (get-current-player-brains game-state)
