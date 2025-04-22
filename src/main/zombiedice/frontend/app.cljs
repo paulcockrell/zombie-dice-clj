@@ -140,10 +140,11 @@
 
 (defn start-game-component
   [game-state]
-  [components/button {:label (if (= (:action @game-state) :adding-players) "Start game" "Restart game")
-                      :full-width true
-                      :disabled (< (count (state/get-players @game-state)) 2)
-                      :on-click #(state/start-game! game-state)}])
+  (let [is-adding-players? (= (:action @game-state) :adding-players)]
+    [components/button {:label (if is-adding-players? "Start game" "Restart game")
+                        :full-width true
+                        :disabled (< (count (state/get-players @game-state)) 2)
+                        :on-click #(if is-adding-players? (state/start-game! game-state) (reset-game! state/game-state))}]))
 
 (defn stats-component
   [game-state]
@@ -201,7 +202,7 @@
 
      [components/card
       [:<>
-       [components/section-title "Dice thrown"]
+       [components/section-title "Dice rolled"]
        [current-dice-component game-state]]]
 
      (when (= (state/get-action game-state) :turn-over)
