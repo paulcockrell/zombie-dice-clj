@@ -156,25 +156,25 @@
     [:div
      {:class "grid grid-cols-2 grid-rows-2 gap-0"}
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl-lg border-primary text-left even:border sm:border sm:px-4 sm:py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl border-primary text-left even:border border px-4 py-2"}
       [:span
        {:class "text-xs text-gray-600"} "Round"]
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} round]]
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr-lg border-primary text-left sm:border sm:border-l-0 sm:px-4 sm:py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr border-primary text-left border border-l-0 px-4 py-2"}
       [:span
        {:class "text-xs text-gray-600"} "Turn"]
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} (str player-position " of " players-count)]]
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl-lg border-primary text-left sm:border sm:border-t-0 sm:px-4 sm:py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl border-primary text-left border border-t-0 px-4 py-2"}
       [:span
        {:class "text-xs text-gray-600"} "Throw"]
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} (count (:throws @game-state))]]
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br-lg border-primary text-left sm:border sm:border-t-0 sm:border-l-0 sm:px-4 sm:py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br border-primary text-left border border-t-0 border-l-0 px-4 py-2"}
       [:span
        {:class "text-xs text-gray-600"} "Dice remaining"]
       [:span
