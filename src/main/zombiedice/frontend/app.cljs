@@ -37,7 +37,7 @@
     [:div.flex.items-center
      [:span.pr-4 "💥"]
      [:p
-      (str (:name (state/get-current-player @game-state)) " has been shot too many times!")]]]])
+      (str (:name (state/get-current-player @game-state)) " has been shot too many times. You loose this rounds brains")]]]])
 
 (defn winner-alert-component [game-state]
   [:div
@@ -67,15 +67,16 @@
          [:th {:class "h-10 px-2 align-middle font-medium text-muted-foreground text-right"}
           "Brains"]]]
        [:tbody {:class "[&_tr:last-child]:border-0"}
-        (for [{:keys [name position brains]} players]
-          (let [is-current-player? (= name (:name current-player))
-                tr-class (if is-current-player? "border-b bg-primary/10" "border-b")
-                player-name (if is-current-player? (str name " 🎲") name)]
-            [:tr {:key name :class tr-class}
-             [:td {:class "p-2 align-middle font-medium"} player-name]
-             [:td {:class "p-2 align-middle text-right"} position]
-             [:td {:class "p-2 align-middle text-right"} 0]
-             [:td {:class "p-2 align-middle text-right"} brains]]))]]
+        (doall (for [{:keys [name position brains]} players]
+                 (let [is-current-player? (= name (:name current-player))
+                       tr-class (if is-current-player? "border-b bg-primary/10" "border-b")
+                       player-name (if is-current-player? (str name " 🎲") name)
+                       player-rank (state/get-player-rank @game-state name)]
+                   [:tr {:key name :class tr-class}
+                    [:td {:class "p-2 align-middle font-medium"} player-name]
+                    [:td {:class "p-2 align-middle text-right"} position]
+                    [:td {:class "p-2 align-middle text-right"} player-rank]
+                    [:td {:class "p-2 align-middle text-right"} brains]])))]]
       [:table {:class "w-full caption-bottom text-sm"}
        [:tbody {:class "[&_tr:last-child]:border-0"}
         [:tr {:class "border-b"}

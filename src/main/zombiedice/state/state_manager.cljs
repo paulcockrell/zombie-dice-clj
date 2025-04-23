@@ -70,6 +70,20 @@
 (defn get-current-player [game-state]
   (first (get-players game-state)))
 
+(defn get-player-rank [game-state name]
+  (let [players (get-players game-state)
+        sorted-scores (->> players
+                           (map :brains)
+                           distinct
+                           sort
+                           reverse)
+        score->rank (zipmap sorted-scores (range 1 (inc (count sorted-scores))))
+        player-score (->> players
+                          (filter #(= (:name %) name))
+                          first
+                          :brains)]
+    (get score->rank player-score)))
+
 (defn get-current-dice [game-state]
   (:current-dice game-state))
 
@@ -181,12 +195,12 @@
     (save-game-state! game-state new-state)))
 
 (defn loose-turn [game-state]
-  (prn "Oh no you got shot too many times, you loose all your brains from this round!")
   (set-action game-state :turn-over))
 
 (defn win-game [game-state]
-  (prn (str "Player " (:name (get-current-player game-state)) " has won the game!"))
-  (set-action game-state :game-over))
+  (-> game-state
+      (update-player-brains)
+      (set-action :game-over)))
 
 (defn check-hand [game-state]
   (let [current-player-brains (get-current-player-brains game-state)

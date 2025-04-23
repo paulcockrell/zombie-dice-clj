@@ -913,18 +913,6 @@ select {
 .rounded-md {
   border-radius: 0.375rem;
 }
-.rounded-bl-lg {
-  border-bottom-left-radius: 0.5rem;
-}
-.rounded-br-lg {
-  border-bottom-right-radius: 0.5rem;
-}
-.rounded-tl-lg {
-  border-top-left-radius: 0.5rem;
-}
-.rounded-tr-lg {
-  border-top-right-radius: 0.5rem;
-}
 .rounded-bl {
   border-bottom-left-radius: 0.25rem;
 }
@@ -943,11 +931,11 @@ select {
 .border-b {
   border-bottom-width: 1px;
 }
-.border-t {
-  border-top-width: 1px;
-}
 .border-l-0 {
   border-left-width: 0px;
+}
+.border-t {
+  border-top-width: 1px;
 }
 .border-t-0 {
   border-top-width: 0px;
@@ -1225,28 +1213,6 @@ select {
 
   .sm\:flex-row {
     flex-direction: row;
-  }
-
-  .sm\:border {
-    border-width: 1px;
-  }
-
-  .sm\:border-l-0 {
-    border-left-width: 0px;
-  }
-
-  .sm\:border-t-0 {
-    border-top-width: 0px;
-  }
-
-  .sm\:px-4 {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .sm\:py-2 {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
   }
 
   .sm\:text-lg {
