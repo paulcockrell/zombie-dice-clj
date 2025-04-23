@@ -70,8 +70,12 @@
         (doall (for [{:keys [name position brains]} players]
                  (let [is-current-player? (= name (:name current-player))
                        tr-class (if is-current-player? "border-b bg-primary/10" "border-b")
-                       player-name (if is-current-player? (str name " 🎲") name)
-                       player-rank (state/get-player-rank @game-state name)]
+                       player-rank (state/get-player-rank @game-state name)
+                       action (state/get-action game-state)
+                       player-name (cond
+                                     (not is-current-player?) name
+                                     (= action :game-over)   (str name " 🏆")
+                                     :else                   (str name " 🎲"))]
                    [:tr {:key name :class tr-class}
                     [:td {:class "p-2 align-middle font-medium"} player-name]
                     [:td {:class "p-2 align-middle text-right"} position]
