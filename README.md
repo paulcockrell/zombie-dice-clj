@@ -65,3 +65,24 @@ First player to reach 13 brains is the winner.
    from a previous round that wasn't shot 3 times is safe.
 1. If it is your turn, you can always stop rolling any time you want, but keep
    in mind you won't get much brains not being greedy!
+
+## Development
+
+This will build/run the app and the tailwind compiler in parallel
+Visit [http://localhost:8666](http://localhost:8666) to view app
+
+```bash
+npm run dev
+```
+
+## Release
+
+```bash
+npm run release
+```
+
+## REPL
+
+```bash
+npm run repl
+```
