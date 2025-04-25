@@ -161,25 +161,25 @@
     [:div
      {:class "grid grid-cols-2 grid-rows-2 gap-0"}
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl border-primary text-left even:border border px-4 py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tl border-primary text-left even:border border px-4 py-2 bg-white"}
       [:span
        {:class "text-xs text-gray-600"} "Round"]
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} round]]
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr border-primary text-left border border-l-0 px-4 py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-tr border-primary text-left border border-l-0 px-4 py-2 bg-white"}
       [:span
        {:class "text-xs text-gray-600"} "Turn"]
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} (str player-position " of " players-count)]]
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl border-primary text-left border border-t-0 px-4 py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-bl border-primary text-left border border-t-0 px-4 py-2 bg-white"}
       [:span
        {:class "text-xs text-gray-600"} "Throw"]
       [:span
        {:class "text-lg font-bold leading-none sm:text-lg text-center"} (count (:throws @game-state))]]
      [:div
-      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br border-primary text-left border border-t-0 border-l-0 px-4 py-2"}
+      {:class "relative z-30 flex flex-1 flex-col justify-center gap-1 border-t rounded-br border-primary text-left border border-t-0 border-l-0 px-4 py-2 bg-white"}
       [:span
        {:class "text-xs text-gray-600"} "Dice remaining"]
       [:span
@@ -189,8 +189,8 @@
   (let [dices (state/get-current-dice @game-state)]
     [:div {:class "flex justify-center gap-4 text-4xl"}
      (for [dice dices]
-       ^{:key (random-uuid)} [:img {:src (str "/images/dice-" (name (:color dice)) "-" (name (:face dice)) ".png")
-                                    :alt "Descriptive text"
+       ^{:key (random-uuid)} [:img {:src (str "images/dice-" (name (:color dice)) "-" (name (:face dice)) ".png")
+                                    :alt (str (name (:color dice)) " " (name (:face dice)) " dice")
                                     :style {:width "80px"
                                             :height "auto"}}])]))
 
