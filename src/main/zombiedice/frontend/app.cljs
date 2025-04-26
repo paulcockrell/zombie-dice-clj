@@ -30,6 +30,15 @@
             (state/check-hand))]
     (state/save-game-state! game-state new-game-state)))
 
+(defn input-error-component [error?]
+  (when error?
+    [:div
+     {:class "bg-secondary/50 border-b border-secondary/40 text-red-700 text-sm p-4 flex justify-between"}
+     [:div
+      [:div.flex.items-center
+       [:span.pr-4 "⚠️"]
+       [:p "The player name must be between 2 and 10 characters long and not be taken"]]]]))
+
 (defn looser-alert-component [game-state]
   [:div
    {:class "bg-secondary/50 border-b border-secondary/40 text-amber-700 text-sm p-4 flex justify-between"}
@@ -115,17 +124,18 @@
        [:td {:class "p-2 align-middle text-right"} (:brains throw-totals)]]]]))
 
 (defn update-players [game-state new-player]
-  (let [new-game-state
-        (state/add-player @game-state @new-player)]
-    (state/save-game-state! game-state new-game-state)))
+  (let [[saved? new-game-state] (state/add-player @game-state @new-player)]
+    (state/save-game-state! game-state new-game-state)
+    saved?))
 
 (defn add-player-component
   [game-state]
-  (let [name (r/atom "")]
+  (let [name (r/atom "") error? (r/atom false)]
     (fn []
       (when (= (:action @game-state) :adding-players)
         [:<>
          [components/divider-horizontal]
+         [input-error-component @error?]
          [:div
           {:class "grid grid-flow-col grid-rows-1 gap-4"}
           [components/input {:placeholder "Player name"
@@ -134,14 +144,16 @@
                              :on-key-press
                              (fn [e]
                                (when (= (.-key e) "Enter")
-                                 (update-players game-state name)
-                                 (reset! name "")))}]
+                                 (let [err (update-players game-state name)]
+                                   (reset! error? err)
+                                   (reset! name ""))))}]
           [components/button {:label "Add"
                               :variant :primary
                               :on-click
                               (fn []
-                                (update-players game-state name)
-                                (reset! name ""))}]]]))))
+                                (let [err (update-players game-state name)]
+                                  (reset! error? err)
+                                  (reset! name "")))}]]]))))
 
 (defn start-game-component
   [game-state]
@@ -202,7 +214,7 @@
      (let [player-name (:name (state/get-current-player @game-state) "n/a")]
        [components/card
         [:<>
-         [components/section-title (str "Current zombie - " player-name)]
+         [components/section-title (str "Current player - " player-name)]
          [current-round-stats-table game-state]]])
 
      [components/card

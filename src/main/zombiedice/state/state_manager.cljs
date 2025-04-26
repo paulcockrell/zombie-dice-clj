@@ -93,7 +93,7 @@
    (> (count name) 10)))
 
 (defn name-taken? [game-state name]
-  (some (partial = name) (map :name (get-players game-state))))
+  (some (partial = (clojure.string/upper-case name)) (map :name (get-players game-state))))
 
 (defn max-players? [game-state]
   (<= 5 (count (get-players game-state))))
@@ -106,15 +106,15 @@
     :else true))
 
 (defn add-player
-  "Add player to the game states players key"
+  "Add player to the game states players key. Returns vector of [error? game-state]"
   [game-state name]
   (if (valid-name? game-state name)
     (let [players (get-players game-state)
           position (+ 1 (count players))
-          new-player (player/init-player :name name :position position)]
-      (assoc game-state :players (conj players new-player)))
+          new-player (player/init-player :name (clojure.string/upper-case name) :position position)]
+      [false (assoc game-state :players (conj players new-player))])
     (do (prn "Invalid name. Must be between 2 and 10 characters and not be taken.")
-        game-state)))
+        [true game-state])))
 
 (defn add-dice
   ([game-state dice]
